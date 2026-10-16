@@ -1,0 +1,124 @@
+name: deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: "Existing image tag (commit SHA) to redeploy. Leave empty to build and deploy the selected branch."
+        required: false
+        default: ""
+
+concurrency:
+  group: deploy-${{ github.repository }}
+  cancel-in-progress: false
+
+env:
+  APP_NAME: culture_unfiltered
+
+jobs:
+  test:
+    if: ${{ inputs.image_tag == '' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+      - name: Build and run tests
+        run: npm test
+        env:
+          ASTRO_TELEMETRY_DISABLED: "1"
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report
+          retention-days: 7
+
+  build:
+    needs: test
+    if: ${{ inputs.image_tag == '' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compute lowercase image name
+        run: echo "IMAGE=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_ENV"
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/amd64
+          push: true
+          tags: |
+            ${{ env.IMAGE }}:${{ github.sha }}
+            ${{ env.IMAGE }}:latest
+          labels: org.opencontainers.image.source=https://github.com/${{ github.repository }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    needs: build
+    # Runs after a successful build, or on its own when an existing image_tag is given (rollback).
+    if: ${{ !cancelled() && (needs.build.result == 'success' || (inputs.image_tag != '' && needs.build.result == 'skipped')) }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+    env:
+      SERVER_HOST: ${{ secrets.SERVER_HOST }}
+      SERVER_USER: ${{ secrets.SERVER_USER }}
+      IMAGE_TAG: ${{ inputs.image_tag || github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate image tag
+        run: |
+          if ! [[ "$IMAGE_TAG" =~ ^[A-Za-z0-9_.-]{1,128}$ ]]; then
+            echo "Invalid image tag: $IMAGE_TAG" >&2
+            exit 1
+          fi
+      - name: Configure SSH
+        env:
+          SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
+          KNOWN_HOSTS: ${{ secrets.SERVER_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+      - name: Upload deploy files
+        run: |
+          # Variables are expanded on the runner on purpose (SC2029).
+          # shellcheck disable=SC2029
+          ssh "$SERVER_USER@$SERVER_HOST" "mkdir -p /opt/apps/$APP_NAME"
+          scp deploy/compose.yaml "$SERVER_USER@$SERVER_HOST:/opt/apps/$APP_NAME/compose.yaml"
+          scp deploy/site.caddy "$SERVER_USER@$SERVER_HOST:/opt/apps/$APP_NAME/site.caddy"
+      - name: Registry login on server
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GHCR_USER: ${{ github.actor }}
+        run: |
+          # shellcheck disable=SC2029
+          printf '%s' "$GHCR_TOKEN" | ssh "$SERVER_USER@$SERVER_HOST" \
+            "docker login ghcr.io -u '$GHCR_USER' --password-stdin"
+      - name: Deploy
+        run: |
+          # shellcheck disable=SC2029
+          ssh "$SERVER_USER@$SERVER_HOST" "/opt/infra/scripts/deploy-app.sh $APP_NAME $IMAGE_TAG"

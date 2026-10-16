@@ -1,0 +1,21 @@
+# Keep the build context small and free of local artifacts and secrets.
+.git
+.github
+.claude
+.astro
+node_modules
+dist
+dist-fixtures
+test-results
+playwright-report
+tests
+playwright.config.ts
+deploy/compose.yaml
+deploy/site.caddy
+*.md
+!src/**/*.md
+.env
+.env.*
+.DS_Store
+Dockerfile
+.dockerignore

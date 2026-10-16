@@ -1,0 +1,4 @@
+cultureunfiltered.org {
+    encode zstd gzip
+    reverse_proxy culture_unfiltered-web:8080
+}
