@@ -14,8 +14,10 @@ interface Props {
   captions?: boolean;
   poster?: ImageMetadata;
   compact?: boolean;
+  /** Load the poster eagerly (use for the main, above-the-fold video). */
+  eager?: boolean;
 }
-const { provider, id, title, captions = false, poster, compact = false } = Astro.props;
+const { provider, id, title, captions = false, poster, compact = false, eager = false } = Astro.props;
 const src =
   provider === 'youtube'
     ? `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0${captions ? '&cc_load_policy=1' : ''}`
@@ -25,7 +27,7 @@ const providerName = provider === 'youtube' ? 'YouTube' : 'Vimeo';
 <figure class:list={['video', { 'video--compact': compact }]}>
   <div class="video__frame" data-video-src={src} data-video-title={title}>
     <button type="button" class="video__play">
-      {poster && <Image src={poster} alt="" width={1200} class="video__poster" loading="lazy" />}
+      {poster && <Image src={poster} alt="" width={1600} class="video__poster" loading={eager ? 'eager' : 'lazy'} fetchpriority={eager ? 'high' : undefined} />}
       <span class="video__icon" aria-hidden="true">▶</span>
       <span class="video__label">Play video<span class="visually-hidden">: {title}</span></span>
     </button>
@@ -54,13 +56,30 @@ const providerName = provider === 'youtube' ? 'YouTube' : 'Vimeo';
 
 <style>
   .video { margin: 0; }
-  .video__frame { position: relative; aspect-ratio: 16 / 9; background: #111; border-radius: var(--radius); overflow: hidden; }
+  .video__frame { position: relative; aspect-ratio: 16 / 9; background: var(--night); border-radius: var(--radius-lg); overflow: hidden; }
+  .video--compact .video__frame { border-radius: var(--radius); }
   .video__frame :global(iframe) { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
-  .video__play { all: unset; position: absolute; inset: 0; cursor: pointer; display: grid; place-items: center; color: #fff; }
-  .video__play:focus-visible { outline: 3px solid var(--color-focus); outline-offset: -3px; }
-  .video__poster { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.75; }
-  .video__icon { position: relative; display: grid; place-items: center; width: 4.5rem; height: 4.5rem; border-radius: 50%; background: rgb(0 0 0 / 0.8); font-size: 1.6rem; padding-left: 0.3rem; }
-  .video__label { position: absolute; bottom: var(--space-3); left: var(--space-3); background: rgb(0 0 0 / 0.8); padding: var(--space-1) var(--space-3); border-radius: 999px; font-weight: 600; }
-  .video__note { font-size: 0.875rem; color: var(--color-muted); margin-top: var(--space-2); }
-  .video--compact .video__icon { width: 3rem; height: 3rem; font-size: 1.1rem; }
+  .video__play { all: unset; position: absolute; inset: 0; cursor: pointer; display: grid; place-items: center; color: var(--paper); }
+  .video__play:focus-visible { outline: 3px solid var(--focus); outline-offset: -6px; border-radius: var(--radius-lg); }
+  .video__poster { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform var(--dur-3) var(--ease-out), filter var(--dur-2); filter: brightness(0.82); }
+  .video__play:hover .video__poster { transform: scale(1.03); filter: brightness(0.7); }
+  .video__icon {
+    position: relative; display: grid; place-items: center; width: clamp(4rem, 3rem + 4vw, 6.5rem); aspect-ratio: 1;
+    border-radius: 50%; background: var(--accent); color: var(--accent-contrast);
+    font-size: clamp(1.3rem, 1rem + 1vw, 2rem); padding-left: 0.3rem;
+    box-shadow: 0 0 0 0 rgb(184 54 15 / 0.45);
+    transition: transform var(--dur-2) var(--ease-out);
+  }
+  .video__play:hover .video__icon { transform: scale(1.08); }
+  @media (prefers-reduced-motion: no-preference) {
+    .video__icon { animation: pulse 2.4s var(--ease-out) 3; }
+  }
+  @keyframes pulse { 70% { box-shadow: 0 0 0 1.2rem rgb(184 54 15 / 0); } 100% { box-shadow: 0 0 0 0 rgb(184 54 15 / 0); } }
+  .video__label {
+    position: absolute; top: var(--space-3); left: var(--space-3);
+    background: var(--night); color: var(--night-text); padding: 0.35rem 0.85rem; border-radius: var(--radius-pill);
+    font-size: var(--step--2); font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+  }
+  .video__note { font-size: var(--step--1); color: var(--muted); margin-top: var(--space-2); }
+  .video--compact .video__icon { width: 3.25rem; font-size: 1.1rem; }
 </style>

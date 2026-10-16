@@ -1,6 +1,10 @@
 ---
 import type { Country } from '@/lib/content';
-interface Props { country: Country }
-const { country } = Astro.props;
+interface Props {
+  country: Country;
+  /** Flags are navigation aids only; content labels show the name alone by default. */
+  flag?: boolean;
+}
+const { country, flag = false } = Astro.props;
 ---
-<span class="country"><span aria-hidden="true">{country.data.flag}</span> {country.data.name}</span>
+<span class="country">{flag && <span aria-hidden="true">{country.data.flag} </span>}{country.data.name}</span>

@@ -20,7 +20,7 @@ const lngs = [-120, -60, 0, 60, 120];
 ---
 <figure class="world-map">
   <svg viewBox={`0 0 ${W} ${H}`} role="group" aria-labelledby={headingId}>
-    <rect width={W} height={H} rx="16" class="world-map__sea" />
+    <rect width={W} height={H} rx="24" class="world-map__sea" />
     {lats.map((lat) => <line x1="0" x2={W} y1={project(lat, 0).y} y2={project(lat, 0).y} class="world-map__grid" />)}
     {lngs.map((lng) => <line y1="0" y2={H} x1={project(0, lng).x} x2={project(0, lng).x} class="world-map__grid" />)}
     {countries.map(({ country, count }) => {
@@ -38,18 +38,28 @@ const lngs = [-120, -60, 0, 60, 120];
 </figure>
 <ul class="world-map__list">
   {countries.map(({ country, count }) => (
-    <li><a href={href(`/people/?country=${country.id}`)}><span aria-hidden="true">{country.data.flag}</span> {country.data.name}</a> <span class="muted">({count})</span></li>
+    <li><a href={href(`/people/?country=${country.id}`)}><span aria-hidden="true">{country.data.flag}</span> {country.data.name} <span class="world-map__count">{count}<span class="visually-hidden"> {count === 1 ? 'participant' : 'participants'}</span></span></a></li>
   ))}
 </ul>
 
 <style>
   .world-map { margin: 0; }
   .world-map svg { width: 100%; height: auto; }
-  .world-map__sea { fill: #eef1f3; }
-  .world-map__grid { stroke: #d5dade; stroke-width: 1; }
-  .world-map__marker circle { fill: var(--color-accent); stroke: #fff; stroke-width: 3; }
-  .world-map__marker text { font: 600 18px var(--font-body); fill: var(--color-text); paint-order: stroke; stroke: #fff; stroke-width: 4px; }
-  .world-map__marker:hover circle, .world-map__marker:focus-visible circle { fill: var(--color-text); }
-  .world-map__marker:focus-visible { outline: 3px solid var(--color-focus); }
-  .world-map__list { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-4); list-style: none; padding: 0; margin: var(--space-3) 0 0; }
+  .world-map__sea { fill: var(--paper-2); }
+  .world-map__grid { stroke: var(--line); stroke-width: 1; stroke-dasharray: 2 6; }
+  .world-map__marker circle { fill: var(--accent); stroke: var(--paper); stroke-width: 4; transition: r var(--dur-2) var(--ease-out), fill var(--dur-1); }
+  .world-map__marker text { font: 700 20px var(--font-ui); fill: var(--ink); paint-order: stroke; stroke: var(--paper-2); stroke-width: 6px; stroke-linejoin: round; }
+  .world-map__marker:hover circle, .world-map__marker:focus-visible circle { fill: var(--ink); r: 18; }
+  .world-map__marker:focus-visible { outline: none; }
+  .world-map__marker:focus-visible circle { stroke: var(--focus); stroke-width: 4; }
+  .world-map__list { display: flex; flex-wrap: wrap; gap: var(--space-2); list-style: none; padding: 0; margin: var(--space-4) 0 0; }
+  .world-map__list a {
+    display: inline-flex; align-items: center; gap: 0.4em; min-height: 44px; padding: 0.4rem 0.9rem;
+    border: 1px solid var(--line-strong); border-radius: var(--radius-pill); background: var(--surface);
+    color: var(--ink); text-decoration: none; font-weight: 600;
+    transition: background-color var(--dur-1), color var(--dur-1);
+  }
+  .world-map__list a:hover { background: var(--ink); color: var(--paper); }
+  .world-map__count { color: var(--muted); font-weight: 500; }
+  .world-map__list a:hover .world-map__count { color: inherit; }
 </style>

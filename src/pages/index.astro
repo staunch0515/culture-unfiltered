@@ -1,72 +1,154 @@
 ---
+import { Image } from 'astro:assets';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import StoryCard from '@/components/StoryCard.astro';
-import ThemeCard from '@/components/ThemeCard.astro';
+import ThemeList from '@/components/ThemeList.astro';
 import PersonCard from '@/components/PersonCard.astro';
 import WorldMap from '@/components/WorldMap.astro';
+import SectionHead from '@/components/SectionHead.astro';
 import { loadSite } from '@/lib/content';
-import { site } from '@/lib/site';
+import { principles } from '@/lib/method';
 import { href } from '@/lib/url';
 
 const s = await loadSite();
 const [featured, ...rest] = s.stories;
 const mapData = s.activeCountries.map((country) => ({ country, count: s.peopleIn(country.id).length }));
+const themeData = s.themes.map((theme) => ({ theme, count: s.storiesAbout(theme.id).length }));
+const stats = [
+  { value: s.people.length, label: 'young people' },
+  { value: s.activeCountries.length, label: s.activeCountries.length === 1 ? 'country' : 'countries' },
+  { value: s.stories.length, label: 'stories' },
+  { value: s.themes.length, label: 'shared questions' },
+];
 ---
 <BaseLayout>
-  <section class="hero wrap">
-    <p class="eyebrow">A digital anthropology exhibition by teenagers</p>
-    <h1>{site.name}</h1>
-    <p class="lede">
-      {s.people.length} young people in {s.activeCountries.length} countries, telling their own stories about everyday life.
-      Not countries. Not stereotypes. Just people.
-    </p>
-    <p><a class="button" href={href('/stories/')}>Explore the stories</a></p>
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="wrap">
+      <p class="eyebrow hero__eyebrow">A digital anthropology exhibition · made by teenagers</p>
+      <h1 id="hero-title" class="hero__title">Culture,<br /><span>Unfiltered.</span></h1>
+      <div class="hero__row">
+        <div class="hero__intro">
+          <p class="lede hero__lede">
+            {s.people.length} young people in {s.activeCountries.length} countries, telling their own stories about everyday life.
+            Not countries. Not stereotypes. Just people.
+          </p>
+          <div class="hero__actions">
+            <a class="button" href={href('/stories/')}>Explore the stories <span class="arrow" aria-hidden="true">→</span></a>
+            <a class="button button--ghost" href={href('/people/')}>Meet the people</a>
+          </div>
+        </div>
+        <ul class="hero__faces" aria-label="The participants">
+          {s.people.map((p) => (
+            <li>
+              <a href={href(`/people/${p.id}/`)} class="face">
+                <Image src={p.data.photo} alt="" width={200} height={200} loading="eager" />
+                <span class="face__name">{p.data.name}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+      <dl class="stats">
+        {stats.map((st) => (
+          <div class="stats__item"><dt class="stats__label">{st.label}</dt><dd class="stats__value">{st.value}</dd></div>
+        ))}
+      </dl>
+    </div>
   </section>
 
   {featured && (
     <section class="section wrap" aria-labelledby="featured-heading">
-      <h2 id="featured-heading">Featured story</h2>
-      <StoryCard story={featured} />
+      <SectionHead index={1} id="featured-heading" title="Featured story" link={{ href: href('/stories/'), label: 'All stories' }} />
+      <div class="reveal"><StoryCard story={featured} variant="feature" /></div>
     </section>
   )}
 
   <section class="section wrap" aria-labelledby="themes-heading">
-    <h2 id="themes-heading">Themes</h2>
-    <p class="lede">Each theme starts with one question that every one of us answered.</p>
-    <ul class="grid">
-      {s.themes.map((t) => <li><ThemeCard theme={t} storyCount={s.storiesAbout(t.id).length} /></li>)}
-    </ul>
+    <SectionHead index={2} id="themes-heading" title="One question, many answers" link={{ href: href('/themes/'), label: 'All themes' }} />
+    <ThemeList themes={themeData} />
   </section>
 
   <section class="section wrap" aria-labelledby="people-heading">
-    <h2 id="people-heading">The people</h2>
-    <ul class="grid">
-      {s.people.map((p) => <li><PersonCard person={p} /></li>)}
+    <SectionHead index={3} id="people-heading" title="The people" link={{ href: href('/people/'), label: 'Meet everyone' }} />
+    <ul class="grid people-grid reveal-stagger">
+      {s.people.map((p) => <li class="reveal"><PersonCard person={p} showBio={false} /></li>)}
     </ul>
-    <p><a href={href('/people/')}>Meet everyone</a></p>
   </section>
 
   <section class="section wrap" aria-labelledby="map-heading">
-    <h2 id="map-heading">Where we are</h2>
-    <WorldMap countries={mapData} headingId="map-heading" />
+    <SectionHead index={4} id="map-heading" title="Where we are" link={{ href: href('/map/'), label: 'Open the map' }} />
+    <div class="reveal"><WorldMap countries={mapData} headingId="map-heading" /></div>
   </section>
 
   {rest.length > 0 && (
     <section class="section wrap" aria-labelledby="latest-heading">
-      <h2 id="latest-heading">More stories</h2>
-      <ul class="grid">
-        {rest.slice(0, 3).map((story) => <li><StoryCard story={story} /></li>)}
+      <SectionHead index={5} id="latest-heading" title="More stories" link={{ href: href('/stories/'), label: 'All stories' }} />
+      <ul class="grid reveal-stagger">
+        {rest.slice(0, 3).map((story) => <li class="reveal"><StoryCard story={story} /></li>)}
       </ul>
     </section>
   )}
 
-  <section class="section wrap" aria-labelledby="method-heading">
-    <h2 id="method-heading">How we work</h2>
-    <p class="prose">We tell personal stories, not national ones. Every participant speaks for themselves, and nobody speaks for a whole country.</p>
-    <p><a href={href('/method/')}>Read about our method</a></p>
+  <section class="section on-night method-band" aria-labelledby="method-heading">
+    <div class="wrap">
+      <SectionHead index={6} id="method-heading" title="How we work" link={{ href: href('/method/'), label: 'Our method' }} />
+      <ol class="method-band__list reveal-stagger">
+        {principles.map((p, i) => (
+          <li class="reveal">
+            <span class="method-band__n" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+            <h3>{p.title}</h3>
+            <p class="muted">{p.text}</p>
+          </li>
+        ))}
+      </ol>
+    </div>
   </section>
 </BaseLayout>
 
 <style>
-  .hero { padding-block: var(--space-6) var(--space-4); }
+  .hero { padding-block: var(--space-6) var(--space-5); }
+  .hero__eyebrow { margin-bottom: var(--space-4); }
+  .hero__title {
+    font-size: clamp(2.6rem, 0.9rem + 8.4vw, 9.5rem);
+    font-stretch: 122%;
+    line-height: 0.88;
+    letter-spacing: -0.035em;
+    margin-bottom: var(--space-5);
+  }
+  .hero__title span { color: var(--accent); }
+  .hero__row { display: grid; gap: var(--space-5); align-items: center; }
+  .hero__lede { max-width: 30ch; }
+  .hero__actions { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+
+  .hero__faces { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-3); max-width: 30rem; }
+  .face { display: block; text-decoration: none; color: var(--ink); text-align: center; }
+  .face img {
+    width: 100%; aspect-ratio: 1; border-radius: 50%; background: var(--paper-2);
+    transition: transform var(--dur-2) var(--ease-out);
+  }
+  .hero__faces li:nth-child(odd) .face img { transform: rotate(-4deg); }
+  .hero__faces li:nth-child(even) .face img { transform: rotate(4deg) translateY(10px); }
+  .hero__faces .face:hover img, .hero__faces .face:focus-visible img { transform: scale(1.06) rotate(0); }
+  .face__name { display: inline-block; margin-top: var(--space-2); font-weight: 700; font-size: var(--step--1); }
+  .face:hover .face__name { color: var(--accent); }
+
+  .stats { display: grid; grid-template-columns: repeat(2, 1fr); margin: var(--space-6) 0 0; border-top: 2px solid var(--ink); }
+  .stats__item { display: flex; flex-direction: column-reverse; padding: var(--space-3) var(--space-3) 0 0; }
+  .stats__value { margin: 0; font-family: var(--font-display); font-weight: 800; font-stretch: 118%; font-size: var(--step-5); line-height: 1; letter-spacing: -0.03em; }
+  .stats__label { font-size: var(--step--1); color: var(--muted); font-weight: 600; }
+
+  @media (min-width: 52rem) {
+    .hero { padding-block: var(--space-7) var(--space-6); }
+    .hero__row { grid-template-columns: 1fr minmax(18rem, 30rem); justify-content: space-between; }
+    .stats { grid-template-columns: repeat(4, 1fr); }
+    .stats__item + .stats__item { border-left: 1px solid var(--line); padding-left: var(--space-4); }
+  }
+
+  .people-grid { grid-template-columns: repeat(auto-fill, minmax(min(100%, 13rem), 1fr)); }
+  @media (max-width: 30rem) { .people-grid { grid-template-columns: repeat(2, 1fr); gap: var(--space-4) var(--space-3); } }
+
+  .method-band { margin-top: var(--space-5); }
+  .method-band__list { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-5); grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr)); }
+  .method-band__n { display: block; color: var(--night-accent); font-weight: 700; margin-bottom: var(--space-2); }
+  .method-band__list h3 { font-size: var(--step-2); }
 </style>

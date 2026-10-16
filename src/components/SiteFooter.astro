@@ -1,25 +1,37 @@
 ---
 import { site } from '@/lib/site';
 import { href } from '@/lib/url';
+const year = new Date().getUTCFullYear();
 ---
-<footer class="site-footer">
+<footer class="site-footer on-night">
   <div class="wrap">
-    <p class="site-footer__name">{site.name}</p>
-    <p class="muted">{site.tagline}</p>
-    <nav aria-label="Footer">
-      <ul>
-        {site.nav.filter((n) => n.path !== '/').map((n) => <li><a href={href(n.path)}>{n.label}</a></li>)}
-        <li><a href={href('/map/')}>Map</a></li>
-      </ul>
-    </nav>
-    <p class="muted small">Made by young people. Participants are shown by first name only.</p>
+    <p class="site-footer__mark">Culture,<br /><span>Unfiltered.</span></p>
+    <div class="site-footer__grid">
+      <p class="site-footer__tagline">{site.tagline}</p>
+      <nav aria-label="Footer">
+        <ul>
+          {site.nav.filter((n) => n.path !== '/').map((n) => <li><a href={href(n.path)}>{n.label}</a></li>)}
+          <li><a href={href('/map/')}>Map</a></li>
+        </ul>
+      </nav>
+      <p class="muted small">Made by young people. Participants are shown by first name only, and we never publish schools or addresses.</p>
+    </div>
+    <p class="muted small site-footer__legal">© {year} {site.name}</p>
   </div>
 </footer>
 
 <style>
-  .site-footer { margin-top: var(--space-6); padding-block: var(--space-5); border-top: 1px solid var(--color-line); }
-  .site-footer__name { font-family: var(--font-display); font-weight: 700; font-size: 1.2rem; margin: 0; }
-  ul { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-4); list-style: none; padding: 0; margin: var(--space-3) 0; }
-  ul a { display: inline-block; padding-block: var(--space-1); }
-  .small { font-size: 0.875rem; }
+  .site-footer { margin-top: var(--space-8); padding-block: var(--space-7) var(--space-5); }
+  .site-footer__mark {
+    font-family: var(--font-display); font-weight: 800; font-stretch: 125%; letter-spacing: -0.03em;
+    font-size: var(--step-6); line-height: 0.9; margin-bottom: var(--space-6);
+  }
+  .site-footer__mark span { color: var(--night-accent); }
+  .site-footer__grid { display: grid; gap: var(--space-5); border-top: 1px solid #3a3a3a; padding-top: var(--space-5); }
+  @media (min-width: 48rem) { .site-footer__grid { grid-template-columns: 1.2fr 1fr 1fr; } }
+  .site-footer__tagline { font-family: var(--font-serif); font-size: var(--step-2); line-height: 1.3; margin: 0; }
+  ul { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-1); }
+  ul a { display: inline-block; padding-block: 0.3rem; color: var(--night-text); text-decoration: none; font-weight: 600; }
+  ul a:hover { color: var(--night-accent); text-decoration: underline; }
+  .site-footer__legal { margin: var(--space-6) 0 0; }
 </style>

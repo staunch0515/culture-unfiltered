@@ -61,6 +61,8 @@ export interface Site {
   /** Theme page comparison: one group per country, in country order. */
   contributionsByCountry(themeId: string): { country: Country; items: Contribution[] }[];
   resourcesFor(storyId: string): Resource[];
+  /** Other stories ranked by shared themes, then shared contributors, then date. */
+  relatedTo(storyId: string, limit?: number): Story[];
 }
 
 const byOrderThenName = <T extends { data: { order: number } }>(label: (x: T) => string) =>
@@ -183,6 +185,24 @@ async function build(): Promise<Site> {
         .filter((g) => g.items.length > 0);
     },
     resourcesFor: (storyId) => resources.filter((r) => r.stories.some((s) => s.id === storyId)),
+    relatedTo: (storyId, limit = 3) => {
+      const base = storyById.get(storyId);
+      if (!base) return [];
+      const themeIds = new Set(base.themes.map((t) => t.id));
+      const personIds = new Set(base.contributors.map((p) => p.id));
+      return stories
+        .filter((s) => s.id !== storyId)
+        .map((s) => ({
+          s,
+          score:
+            s.themes.filter((t) => themeIds.has(t.id)).length * 10 +
+            s.contributors.filter((p) => personIds.has(p.id)).length,
+        }))
+        .filter((x) => x.score > 0)
+        .sort((a, b) => b.score - a.score || b.s.data.date.getTime() - a.s.data.date.getTime())
+        .slice(0, limit)
+        .map((x) => x.s);
+    },
   };
 }
 

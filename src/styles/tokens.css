@@ -1,30 +1,89 @@
-/* Design tokens. Stage 1 keeps these minimal; Stage 2 refines the visual system. */
+/*
+ * Design tokens: Culture, Unfiltered.
+ * Paper and ink, one vermilion accent, strong wide display type, generous space.
+ * Contrast (WCAG 2.2 AA): ink 16.9:1, muted 6.5:1, accent text 5.3:1 on paper.
+ */
 :root {
-  --color-bg: #fbfaf7;
-  --color-surface: #ffffff;
-  --color-text: #1a1a1a;
-  --color-muted: #555049;
-  --color-line: #ddd8cf;
-  --color-accent: #b3401f;
-  --color-accent-contrast: #ffffff;
-  --color-focus: #1d4ed8;
+  /* Colour */
+  --paper: #f6f3ec;
+  --paper-2: #ece6da;
+  --surface: #fffdf8;
+  --ink: #121212;
+  --ink-soft: #3b3833;
+  --muted: #5c574f;
+  --line: #d8d1c3;
+  --line-strong: #8a8377; /* non-text UI only (3.4:1) */
+  --accent: #b8360f;
+  --accent-contrast: #ffffff;
+  --accent-tint: #f3dcd0;
+  --night: #141414;
+  --night-text: #f6f3ec;
+  --night-muted: #a9a398;
+  --night-accent: #ff8657;
+  --focus: #1d4ed8;
+  --notice-bg: #121212;
+  --notice-text: #f6f3ec;
 
-  --font-body: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  --font-display: Georgia, 'Times New Roman', serif;
+  /* Type families */
+  --font-display: 'Archivo Variable', 'Archivo', 'Helvetica Neue', Arial, sans-serif;
+  --font-ui: 'Archivo Variable', 'Archivo', 'Helvetica Neue', Arial, sans-serif;
+  --font-serif: 'Source Serif 4 Variable', 'Source Serif 4', Georgia, 'Times New Roman', serif;
 
+  /* Fluid type scale (375px → 1440px) */
+  --step--2: 0.75rem;
+  --step--1: 0.875rem;
+  --step-0: clamp(1rem, 0.96rem + 0.19vw, 1.125rem);
+  --step-1: clamp(1.15rem, 1.07rem + 0.38vw, 1.4rem);
+  --step-2: clamp(1.35rem, 1.2rem + 0.7vw, 1.85rem);
+  --step-3: clamp(1.65rem, 1.35rem + 1.3vw, 2.6rem);
+  --step-4: clamp(2.1rem, 1.6rem + 2.3vw, 3.75rem);
+  --step-5: clamp(2.5rem, 1.75rem + 3.6vw, 5.25rem);
+  --step-6: clamp(3rem, 1.6rem + 6.3vw, 7.75rem);
+
+  /* Display type character */
+  --display-weight: 800;
+  --display-stretch: 118%;
+  --display-tracking: -0.025em;
+
+  /* Space */
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 1rem;
   --space-4: 1.5rem;
   --space-5: 2.5rem;
   --space-6: 4rem;
+  --space-7: 6rem;
+  --space-8: clamp(4rem, 2.5rem + 6vw, 9rem);
 
-  --radius: 0.5rem;
-  --measure: 68ch;
-  --page-max: 72rem;
+  /* Layout */
+  --page-max: 80rem;
+  --measure: 66ch;
   --gutter: 1rem;
+  --header-h: 4rem;
+
+  /* Shape */
+  --radius-sm: 4px;
+  --radius: 8px;
+  --radius-lg: 16px;
+  --radius-pill: 999px;
+  --shadow-1: 0 1px 2px rgb(18 18 18 / 0.06), 0 2px 6px rgb(18 18 18 / 0.05);
+  --shadow-2: 0 10px 30px -10px rgb(18 18 18 / 0.25);
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-1: 150ms;
+  --dur-2: 280ms;
+  --dur-3: 600ms;
 }
 
 @media (min-width: 48rem) {
-  :root { --gutter: 2rem; }
+  :root { --gutter: 2rem; --header-h: 4.5rem; }
+}
+@media (min-width: 90rem) {
+  :root { --gutter: 3rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --dur-1: 0ms; --dur-2: 0ms; --dur-3: 0ms; }
 }

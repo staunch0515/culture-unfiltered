@@ -4,12 +4,29 @@ import { resourceKindLabels } from '@/lib/constants';
 import { href } from '@/lib/url';
 interface Props { resource: Resource; headingLevel?: 'h2' | 'h3' }
 const { resource, headingLevel: H = 'h3' } = Astro.props;
+const d = resource.data;
 ---
-<article class="card resource-card" data-kind={resource.data.kind}>
-  <div class="card__body">
-    <p class="eyebrow">{resourceKindLabels[resource.data.kind]}</p>
-    <H><a class="card__link" href={href(`/resources/${resource.id}/`)}>{resource.data.title}</a></H>
-    <p>{resource.data.description}</p>
-    <p class="muted">Ages {resource.data.ageGroup} · {resource.data.duration}</p>
-  </div>
+<article class="card resource-card" data-kind={d.kind}>
+  <p class="eyebrow resource-card__kind">{resourceKindLabels[d.kind]}</p>
+  <H class="card__title resource-card__title"><a class="card__link" href={href(`/resources/${resource.id}/`)}>{d.title}</a></H>
+  <p class="resource-card__desc">{d.description}</p>
+  <dl class="resource-card__meta">
+    <div><dt>Ages</dt><dd>{d.ageGroup}</dd></div>
+    <div><dt>Time</dt><dd>{d.duration}</dd></div>
+    {d.pdf && <div><dt>Format</dt><dd>PDF</dd></div>}
+  </dl>
 </article>
+<style>
+  .resource-card {
+    background: var(--surface); border: 1px solid var(--line); border-top: 4px solid var(--accent);
+    border-radius: var(--radius); padding: var(--space-4);
+    transition: transform var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
+  }
+  .resource-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-2); }
+  .resource-card__kind { color: var(--accent); margin-bottom: var(--space-2); }
+  .resource-card__title { font-size: var(--step-2); margin-bottom: var(--space-2); }
+  .resource-card__desc { font-family: var(--font-serif); color: var(--ink-soft); }
+  .resource-card__meta { display: flex; gap: var(--space-4); margin: auto 0 0; padding-top: var(--space-3); border-top: 1px solid var(--line); font-size: var(--step--1); }
+  .resource-card__meta dt { color: var(--muted); font-weight: 600; font-size: var(--step--2); letter-spacing: 0.1em; text-transform: uppercase; }
+  .resource-card__meta dd { margin: 0; font-weight: 600; }
+</style>

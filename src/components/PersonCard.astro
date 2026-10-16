@@ -3,17 +3,21 @@ import { Image } from 'astro:assets';
 import CountryLabel from './CountryLabel.astro';
 import type { Person } from '@/lib/content';
 import { href } from '@/lib/url';
-interface Props { person: Person; headingLevel?: 'h2' | 'h3' }
-const { person, headingLevel: H = 'h3' } = Astro.props;
+interface Props { person: Person; headingLevel?: 'h2' | 'h3'; showBio?: boolean }
+const { person, headingLevel: H = 'h3', showBio = true } = Astro.props;
 ---
 <article class="card person-card" data-country={person.country.id}>
-  <Image src={person.data.photo} alt={person.data.photoAlt} width={400} height={400} class="person-card__photo" />
-  <div class="card__body">
-    <H><a class="card__link" href={href(`/people/${person.id}/`)}>{person.data.name}</a></H>
-    <p class="muted"><CountryLabel country={person.country} /></p>
-    <p>{person.data.bio}</p>
+  <div class="card__media person-card__media">
+    <Image src={person.data.photo} alt={person.data.photoAlt} width={480} height={480} />
   </div>
+  <p class="eyebrow person-card__place"><CountryLabel country={person.country} /></p>
+  <H class="card__title person-card__name"><a class="card__link" href={href(`/people/${person.id}/`)}>{person.data.name}</a></H>
+  {showBio && <p class="person-card__bio">{person.data.bio}</p>}
 </article>
 <style>
-  .person-card__photo { width: 100%; aspect-ratio: 1; object-fit: cover; }
+  .person-card__media { aspect-ratio: 4 / 5; margin-bottom: var(--space-3); border-radius: var(--radius-lg); }
+  .person-card__media img { height: 100%; object-fit: cover; }
+  .person-card__place { margin-bottom: var(--space-1); }
+  .person-card__name { font-size: var(--step-3); margin-bottom: var(--space-2); }
+  .person-card__bio { font-family: var(--font-serif); color: var(--ink-soft); margin: 0; }
 </style>

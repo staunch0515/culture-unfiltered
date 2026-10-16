@@ -7,8 +7,11 @@ const mapData = s.activeCountries.map((country) => ({ country, count: s.peopleIn
 ---
 <BaseLayout title="Map" description="Where the participants of Culture, Unfiltered live.">
   <div class="wrap">
-    <h1 id="map-title">Where we are</h1>
-    <p class="lede">The map is just a way in. Choose a place to meet the people who live there.</p>
+    <header class="page-head">
+      <p class="eyebrow">{s.activeCountries.length} countries</p>
+      <h1 id="map-title">Where we are</h1>
+      <p class="lede">The map is just a way in. Choose a place to meet the people who live there.</p>
+    </header>
     <WorldMap countries={mapData} headingId="map-title" />
   </div>
 </BaseLayout>

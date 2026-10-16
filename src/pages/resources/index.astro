@@ -6,10 +6,13 @@ const s = await loadSite();
 ---
 <BaseLayout title="Resources" description="Free classroom activities, discussion guides and reflection prompts built around our stories.">
   <div class="wrap">
-    <h1>Resources</h1>
-    <p class="lede">Free activities for classrooms, clubs and curious people. Each one builds on stories from this site.</p>
-    <ul class="grid">
-      {s.resources.map((r) => <li><ResourceCard resource={r} headingLevel="h2" /></li>)}
+    <header class="page-head">
+      <p class="eyebrow">For teachers, clubs and curious people</p>
+      <h1>Resources</h1>
+      <p class="lede">Free activities that build on stories from this site. Print them, adapt them, make them yours.</p>
+    </header>
+    <ul class="grid reveal-stagger">
+      {s.resources.map((r) => <li class="reveal"><ResourceCard resource={r} headingLevel="h2" /></li>)}
     </ul>
   </div>
 </BaseLayout>

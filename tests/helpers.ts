@@ -46,5 +46,5 @@ export async function horizontalOverflow(page: Page): Promise<number> {
   return page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
 }
 
-export const SITE_ORIGIN = 'http://localhost:4321';
-export const FIXTURE_ORIGIN = 'http://localhost:4322';
+export const SITE_ORIGIN = 'http://localhost:4421';
+export const FIXTURE_ORIGIN = 'http://localhost:4422';

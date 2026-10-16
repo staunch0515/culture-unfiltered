@@ -12,6 +12,8 @@ test('the build produced every expected section', () => {
 for (const route of routes) {
   test(`page ${route}`, async ({ page }) => {
     const errors = trackErrors(page);
+    // Reduced motion keeps scroll-reveal content fully opaque, so axe checks every element.
+    await page.emulateMedia({ reducedMotion: 'reduce' });
     const res = await page.goto(route);
     expect(res?.status(), 'HTTP status').toBe(200);
     await expect(page.locator('h1')).toHaveCount(1);

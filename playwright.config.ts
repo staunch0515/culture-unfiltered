@@ -1,7 +1,7 @@
 import { defineConfig } from '@playwright/test';
 
-export const SITE = 'http://localhost:4321';
-export const FIXTURE_SITE = 'http://localhost:4322';
+export const SITE = 'http://localhost:4421';
+export const FIXTURE_SITE = 'http://localhost:4422';
 
 export default defineConfig({
   testDir: './tests',
@@ -16,7 +16,7 @@ export default defineConfig({
     { name: 'desktop', use: { viewport: { width: 1440, height: 900 } } },
   ],
   webServer: [
-    { command: 'node scripts/serve.mjs dist 4321', url: SITE, reuseExistingServer: !process.env.CI },
-    { command: 'node scripts/serve.mjs dist-fixtures 4322', url: FIXTURE_SITE, reuseExistingServer: !process.env.CI },
+    { command: 'node scripts/serve.mjs dist 4421', url: SITE, reuseExistingServer: !process.env.CI },
+    { command: 'node scripts/serve.mjs dist-fixtures 4422', url: FIXTURE_SITE, reuseExistingServer: !process.env.CI },
   ],
 });

@@ -7,8 +7,11 @@ const s = await loadSite();
 ---
 <BaseLayout title="People" description="Meet the young people behind Culture, Unfiltered.">
   <div class="wrap">
-    <h1>People</h1>
-    <p class="lede">Everyone here speaks for themselves, not for their country. Meet the people behind the stories.</p>
+    <header class="page-head">
+      <p class="eyebrow">{s.people.length} voices · {s.activeCountries.length} countries</p>
+      <h1>People</h1>
+      <p class="lede">Everyone here speaks for themselves, not for their country. Meet the people behind the stories.</p>
+    </header>
 
     <form data-filter="people" data-noun="person" data-nouns="people" hidden>
       <fieldset class="chips">
@@ -22,15 +25,27 @@ const s = await loadSite();
         ))}
       </fieldset>
     </form>
-    <p class="muted" role="status" data-filter-status="people"></p>
+    <p class="filter-status" role="status" data-filter-status="people"></p>
 
-    <ul class="grid">
+    <ul class="grid people reveal-stagger">
       {s.people.map((p) => (
-        <li data-filter-item="people" data-country={p.country.id}><PersonCard person={p} headingLevel="h2" /></li>
+        <li class="reveal" data-filter-item="people" data-country={p.country.id}><PersonCard person={p} headingLevel="h2" /></li>
       ))}
     </ul>
   </div>
 </BaseLayout>
+
+<style>
+  .people { grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr)); }
+  /* Phones: compact horizontal cards instead of one tall portrait per screen. */
+  @media (max-width: 34rem) {
+    .people { gap: var(--space-4); }
+    .people :global(.person-card) { display: grid; grid-template-columns: 6.5rem 1fr; column-gap: var(--space-3); align-content: start; }
+    .people :global(.person-card__media) { grid-row: 1 / span 3; aspect-ratio: 1; margin: 0; border-radius: 50%; }
+    .people :global(.person-card__name) { font-size: var(--step-2); }
+    .people :global(.person-card__bio) { font-size: var(--step--1); }
+  }
+</style>
 
 <script>
   import { initFilters } from '@/scripts/filters';

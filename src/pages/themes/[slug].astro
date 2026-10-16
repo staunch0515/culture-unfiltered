@@ -2,6 +2,7 @@
 import { Image } from 'astro:assets';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import StoryCard from '@/components/StoryCard.astro';
+import SectionHead from '@/components/SectionHead.astro';
 import { loadSite, type Theme } from '@/lib/content';
 import { href } from '@/lib/url';
 
@@ -18,30 +19,32 @@ const stories = s.storiesAbout(theme.id);
 <BaseLayout title={theme.data.title} description={theme.data.question}>
   <div class="wrap">
     <header class="theme-head">
-      <p class="eyebrow"><span aria-hidden="true">{theme.data.emoji}</span> Theme</p>
+      <p class="eyebrow"><span class="theme-head__emoji" aria-hidden="true">{theme.data.emoji}</span> Theme</p>
       <h1>{theme.data.title}</h1>
-      <p class="question">{theme.data.question}</p>
-      <p class="lede">{theme.data.description}</p>
+      <p class="theme-head__question">{theme.data.question}</p>
+      <p class="theme-head__desc">{theme.data.description}</p>
     </header>
 
-    <section aria-labelledby="compare-heading">
-      <h2 id="compare-heading">Side by side</h2>
+    <section class="section" aria-labelledby="compare-heading">
+      <SectionHead index={1} id="compare-heading" title="Side by side" />
       {groups.length === 0 ? (
         <p class="muted">No stories on this theme yet.</p>
       ) : (
-        <ul class="compare">
+        <ul class="compare reveal-stagger">
           {groups.map(({ country, items }) => (
-            <li class="compare__col">
-              <h3><span aria-hidden="true">{country.data.flag}</span> {country.data.name}</h3>
+            <li class="compare__col reveal">
+              <h3 class="compare__country">{country.data.name}</h3>
               <ul class="compare__items">
                 {items.map(({ person, story, perspective }) => (
                   <li class="compare__item">
-                    <div class="compare__who">
-                      <Image src={person.data.photo} alt="" width={48} height={48} class="compare__avatar" />
-                      <a href={href(`/people/${person.id}/`)}>{person.data.name}</a>
-                    </div>
                     {perspective?.text && <blockquote><p>{perspective.text}</p></blockquote>}
-                    <p class="muted small">From <a href={href(`/stories/${story.id}/`)}>{story.data.title}</a></p>
+                    <div class="compare__who">
+                      <Image src={person.data.photo} alt="" width={96} height={96} class="compare__avatar" />
+                      <div>
+                        <a class="compare__name" href={href(`/people/${person.id}/`)}>{person.data.name}</a>
+                        <p class="compare__from">From <a href={href(`/stories/${story.id}/`)}>{story.data.title}</a></p>
+                      </div>
+                    </div>
                   </li>
                 ))}
               </ul>
@@ -52,25 +55,32 @@ const stories = s.storiesAbout(theme.id);
     </section>
 
     {stories.length > 0 && (
-      <section aria-labelledby="stories-heading">
-        <h2 id="stories-heading">Stories about {theme.data.title.toLowerCase()}</h2>
-        <ul class="grid">{stories.map((story) => <li><StoryCard story={story} /></li>)}</ul>
+      <section class="section" aria-labelledby="stories-heading">
+        <SectionHead index={2} id="stories-heading" title={`Stories about ${theme.data.title.toLowerCase()}`} />
+        <ul class="grid reveal-stagger">{stories.map((story) => <li class="reveal"><StoryCard story={story} /></li>)}</ul>
       </section>
     )}
 
-    <p><a href={href('/themes/')}>All themes</a></p>
+    <p><a class="text-link" href={href('/themes/')}><span aria-hidden="true">←</span> All themes</a></p>
   </div>
 </BaseLayout>
 
 <style>
-  .theme-head { padding-block: var(--space-5) 0; }
-  .question { font-family: var(--font-display); font-size: clamp(1.4rem, 3vw, 2rem); margin: 0 0 var(--space-3); }
-  .compare { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); }
-  .compare__col { border-top: 3px solid var(--color-text); padding-top: var(--space-3); }
-  .compare__items { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-4); }
-  .compare__who { display: flex; align-items: center; gap: var(--space-2); font-weight: 600; }
-  .compare__avatar { width: 2.5rem; height: 2.5rem; border-radius: 50%; }
-  blockquote { margin: var(--space-2) 0; font-family: var(--font-display); font-size: 1.1rem; }
-  blockquote p { margin: 0; }
-  .small { font-size: 0.875rem; margin: 0; }
+  .theme-head { padding-block: var(--space-7) var(--space-3); }
+  .theme-head__emoji { font-size: 1.4em; vertical-align: -0.15em; margin-right: 0.2em; }
+  .theme-head h1 { font-size: var(--step-6); line-height: 0.9; }
+  .theme-head__question { font-family: var(--font-serif); font-size: var(--step-4); line-height: 1.12; max-width: 22ch; margin-bottom: var(--space-4); }
+  .theme-head__desc { font-size: var(--step-1); color: var(--ink-soft); max-width: 50ch; }
+
+  .compare { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-5) var(--space-4); grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr)); }
+  .compare__col { border-top: 2px solid var(--ink); padding-top: var(--space-3); }
+  .compare__country { font-size: var(--step-2); margin-bottom: var(--space-4); }
+  .compare__items { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-5); }
+  .compare__item blockquote { margin: 0 0 var(--space-3); font-family: var(--font-serif); font-size: var(--step-1); line-height: 1.45; }
+  .compare__item blockquote p { margin: 0; }
+  .compare__item blockquote::before { content: '“'; display: block; font-family: var(--font-display); font-weight: 800; font-size: 2.6rem; line-height: 0.6; color: var(--accent); margin-bottom: var(--space-1); }
+  .compare__who { display: flex; gap: var(--space-3); align-items: center; }
+  .compare__avatar { width: 2.75rem; height: 2.75rem; border-radius: 50%; background: var(--paper-2); }
+  .compare__name { font-weight: 700; color: var(--ink); }
+  .compare__from { margin: 0; font-size: var(--step--1); color: var(--muted); }
 </style>

@@ -1,5 +1,6 @@
 ---
 import '@/styles/global.css';
+import archivoLatin from '@fontsource-variable/archivo/files/archivo-latin-wdth-normal.woff2?url';
 import SiteHeader from '@/components/SiteHeader.astro';
 import SiteFooter from '@/components/SiteFooter.astro';
 import { site } from '@/lib/site';
@@ -22,30 +23,38 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
+    <link rel="preload" href={archivoLatin} as="font" type="font/woff2" crossorigin />
     <link rel="icon" href={`${import.meta.env.BASE_URL}favicon.svg`} type="image/svg+xml" />
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
-    <meta name="theme-color" content="#fbfaf7" />
+    <meta name="theme-color" content="#f6f3ec" />
     <script is:inline>document.documentElement.classList.add('js');</script>
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
     {site.showSampleNotice && (
-      <p class="sample-notice">Preview: every person, story and photo on this site is placeholder content.</p>
+      <p class="sample-notice"><span class="sample-notice__dot" aria-hidden="true"></span>Preview: all people and stories are placeholders</p>
     )}
     <SiteHeader />
     <main id="main" tabindex="-1" data-pagefind-body={searchable ? '' : undefined}>
       <slot />
     </main>
     <SiteFooter />
+    <script>
+      import { initReveal } from '@/scripts/reveal';
+      initReveal();
+    </script>
   </body>
 </html>
 
 <style>
   .sample-notice {
-    margin: 0; padding: var(--space-2) var(--gutter); text-align: center; font-size: 0.875rem;
-    background: #fff3c4; color: #3d3100; border-bottom: 1px solid #e8d48a;
+    display: flex; align-items: center; justify-content: center; gap: var(--space-2);
+    margin: 0; padding: 0.45rem var(--gutter); text-align: center;
+    font-size: var(--step--2); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+    background: var(--notice-bg); color: var(--notice-text);
   }
+  .sample-notice__dot { flex: none; width: 0.5rem; height: 0.5rem; border-radius: 50%; background: var(--night-accent); }
   main:focus { outline: none; }
 </style>

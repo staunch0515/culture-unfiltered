@@ -11,8 +11,11 @@ const media = mediaTypes.filter((m) => s.stories.some((st) => st.data.mediaType 
 ---
 <BaseLayout title="Stories" description="Videos, articles, photo essays, interviews and audio, made by young people.">
   <div class="wrap">
-    <h1>Stories</h1>
-    <p class="lede">Videos, articles, photo essays, interviews and audio. Filter by country, theme or format.</p>
+    <header class="page-head">
+      <p class="eyebrow">{s.stories.length} stories · {media.length} formats</p>
+      <h1>Stories</h1>
+      <p class="lede">Videos, articles, photo essays, interviews and audio. Filter by country, theme or format.</p>
+    </header>
 
     <form data-filter="stories" data-noun="story" data-nouns="stories" class="filters" hidden>
       <label>Country
@@ -33,20 +36,24 @@ const media = mediaTypes.filter((m) => s.stories.some((st) => st.data.mediaType 
           {media.map((m) => <option value={m}>{mediaLabels[m]}</option>)}
         </select>
       </label>
-      <button type="reset" class="button">Clear filters</button>
+      <button type="reset" class="button button--ghost">Clear filters</button>
     </form>
-    <p class="muted" role="status" data-filter-status="stories"></p>
+    <p class="filter-status" role="status" data-filter-status="stories"></p>
 
-    <ul class="grid">
+    <ul class="grid reveal-stagger">
       {s.stories.map((story) => (
-        <li data-filter-item="stories" data-countries={story.countries.map((c) => c.id).join(' ')} data-themes={story.themes.map((t) => t.id).join(' ')} data-media={story.data.mediaType}>
+        <li class="reveal" data-filter-item="stories" data-countries={story.countries.map((c) => c.id).join(' ')} data-themes={story.themes.map((t) => t.id).join(' ')} data-media={story.data.mediaType}>
           <StoryCard story={story} headingLevel="h2" />
         </li>
       ))}
     </ul>
-    <p data-filter-empty="stories" hidden>No stories match these filters yet. Try clearing one.</p>
+    <p class="empty" data-filter-empty="stories" hidden>No stories match these filters yet. Try clearing one.</p>
   </div>
 </BaseLayout>
+
+<style>
+  .empty { font-family: var(--font-serif); font-size: var(--step-2); padding: var(--space-6) 0; text-align: center; color: var(--muted); }
+</style>
 
 <script>
   import { initFilters } from '@/scripts/filters';

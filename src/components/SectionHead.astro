@@ -1,0 +1,14 @@
+---
+interface Props {
+  index: number;
+  id: string;
+  title: string;
+  link?: { href: string; label: string };
+}
+const { index, id, title, link } = Astro.props;
+---
+<div class="section-head">
+  <span class="section-head__index" aria-hidden="true">{String(index).padStart(2, '0')}</span>
+  <h2 id={id}>{title}</h2>
+  {link && <a class="text-link section-head__link" href={link.href}>{link.label} <span class="arrow" aria-hidden="true">→</span></a>}
+</div>
