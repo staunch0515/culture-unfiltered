@@ -2,7 +2,9 @@
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import ResourceCard from '@/components/ResourceCard.astro';
 import { loadSite } from '@/lib/content';
+import { resourceKinds, resourceKindLabels } from '@/lib/constants';
 const s = await loadSite();
+const kinds = resourceKinds.filter((k) => s.resources.some((r) => r.data.kind === k));
 ---
 <BaseLayout title="Resources" description="Free classroom activities, discussion guides and reflection prompts built around our stories.">
   <div class="wrap">
@@ -11,8 +13,25 @@ const s = await loadSite();
       <h1>Resources</h1>
       <p class="lede">Free activities that build on stories from this site. Print them, adapt them, make them yours.</p>
     </header>
+    {kinds.length > 1 && (
+      <form data-filter="resources" data-noun="resource" hidden>
+        <fieldset class="chips">
+          <legend>Filter by type</legend>
+          <label class="chip"><input type="radio" name="kind" value="" data-key="kind" checked /><span>All</span></label>
+          {kinds.map((k) => (
+            <label class="chip"><input type="radio" name="kind" value={k} data-key="kind" /><span>{resourceKindLabels[k]}</span></label>
+          ))}
+        </fieldset>
+      </form>
+    )}
+    <p class="filter-status" role="status" data-filter-status="resources"></p>
     <ul class="grid reveal-stagger">
-      {s.resources.map((r) => <li class="reveal"><ResourceCard resource={r} headingLevel="h2" /></li>)}
+      {s.resources.map((r) => <li class="reveal" data-filter-item="resources" data-kind={r.data.kind}><ResourceCard resource={r} headingLevel="h2" /></li>)}
     </ul>
   </div>
 </BaseLayout>
+
+<script>
+  import { initFilters } from '@/scripts/filters';
+  initFilters();
+</script>

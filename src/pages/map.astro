@@ -1,9 +1,18 @@
 ---
+import { Image } from 'astro:assets';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import WorldMap from '@/components/WorldMap.astro';
+import SectionHead from '@/components/SectionHead.astro';
 import { loadSite } from '@/lib/content';
+import { href } from '@/lib/url';
+
 const s = await loadSite();
 const mapData = s.activeCountries.map((country) => ({ country, count: s.peopleIn(country.id).length }));
+const panels = s.activeCountries.map((country) => ({
+  country,
+  people: s.peopleIn(country.id),
+  stories: s.stories.filter((st) => st.countries.some((c) => c.id === country.id)).length,
+}));
 ---
 <BaseLayout title="Map" description="Where the participants of Culture, Unfiltered live.">
   <div class="wrap">
@@ -13,5 +22,42 @@ const mapData = s.activeCountries.map((country) => ({ country, count: s.peopleIn
       <p class="lede">The map is just a way in. Choose a place to meet the people who live there.</p>
     </header>
     <WorldMap countries={mapData} headingId="map-title" />
+
+    <section class="section" aria-labelledby="places-heading">
+      <SectionHead index={1} id="places-heading" title="By place" />
+      <ul class="places reveal-stagger">
+        {panels.map(({ country, people, stories }) => (
+          <li class="place reveal" id={`place-${country.id}`}>
+            <h3 class="place__name">{country.data.name}</h3>
+            <ul class="place__people">
+              {people.map((p) => (
+                <li>
+                  <a href={href(`/people/${p.id}/`)}>
+                    <Image src={p.data.photo} alt="" width={96} height={96} />
+                    <span>{p.data.name}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+            <p class="place__links">
+              <a href={href(`/people/?country=${country.id}`)}>{people.length} {people.length === 1 ? 'person' : 'people'}</a>
+              <a href={href(`/stories/?country=${country.id}`)}>{stories} {stories === 1 ? 'story' : 'stories'}</a>
+            </p>
+          </li>
+        ))}
+      </ul>
+    </section>
   </div>
 </BaseLayout>
+
+<style>
+  .places { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr)); }
+  .place { border-top: 2px solid var(--ink); padding-top: var(--space-3); }
+  .place__name { font-size: var(--step-2); margin-bottom: var(--space-3); }
+  .place__people { list-style: none; padding: 0; margin: 0 0 var(--space-3); display: flex; flex-wrap: wrap; gap: var(--space-3); }
+  .place__people a { display: flex; align-items: center; gap: var(--space-2); color: var(--ink); font-weight: 700; text-decoration: none; min-height: 44px; }
+  .place__people a:hover span { color: var(--accent); text-decoration: underline; }
+  .place__people img { width: 2.75rem; height: 2.75rem; border-radius: 50%; background: var(--paper-2); }
+  .place__links { display: flex; gap: var(--space-4); margin: 0; font-weight: 600; }
+  .place__links a { display: inline-block; padding-block: var(--space-1); }
+</style>

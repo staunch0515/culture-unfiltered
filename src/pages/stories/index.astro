@@ -3,11 +3,13 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
 import StoryCard from '@/components/StoryCard.astro';
 import { loadSite } from '@/lib/content';
 import { mediaTypes, mediaLabels } from '@/lib/constants';
+import { href } from '@/lib/url';
 
 const s = await loadSite();
 const countries = s.countries.filter((c) => s.stories.some((st) => st.countries.some((x) => x.id === c.id)));
 const themes = s.themes.filter((t) => s.storiesAbout(t.id).length > 0);
 const media = mediaTypes.filter((m) => s.stories.some((st) => st.data.mediaType === m));
+const countBy = (pred: (st: (typeof s.stories)[number]) => boolean) => s.stories.filter(pred).length;
 ---
 <BaseLayout title="Stories" description="Videos, articles, photo essays, interviews and audio, made by young people.">
   <div class="wrap">
@@ -17,32 +19,38 @@ const media = mediaTypes.filter((m) => s.stories.some((st) => st.data.mediaType 
       <p class="lede">Videos, articles, photo essays, interviews and audio. Filter by country, theme or format.</p>
     </header>
 
-    <form data-filter="stories" data-noun="story" data-nouns="stories" class="filters" hidden>
-      <label>Country
-        <select name="country" data-key="countries">
-          <option value="">All countries</option>
-          {countries.map((c) => <option value={c.id}>{c.data.flag} {c.data.name}</option>)}
-        </select>
-      </label>
-      <label>Theme
-        <select name="theme" data-key="themes">
-          <option value="">All themes</option>
-          {themes.map((t) => <option value={t.id}>{t.data.title}</option>)}
-        </select>
-      </label>
-      <label>Format
-        <select name="media" data-key="media">
-          <option value="">All formats</option>
-          {media.map((m) => <option value={m}>{mediaLabels[m]}</option>)}
-        </select>
-      </label>
-      <button type="reset" class="button button--ghost">Clear filters</button>
+    <form data-filter="stories" data-noun="story" data-nouns="stories" class="story-filters" role="search" aria-label="Filter stories" hidden>
+      <div class="story-filters__search">
+        <label for="story-q">Search stories</label>
+        <input id="story-q" type="search" name="q" data-search="Story" placeholder="Words, names, places…" autocomplete="off" />
+      </div>
+      <div class="filters">
+        <label>Country
+          <select name="country" data-key="countries">
+            <option value="">All countries</option>
+            {countries.map((c) => <option value={c.id}>{c.data.flag} {c.data.name} ({countBy((st) => st.countries.some((x) => x.id === c.id))})</option>)}
+          </select>
+        </label>
+        <label>Theme
+          <select name="theme" data-key="themes">
+            <option value="">All themes</option>
+            {themes.map((t) => <option value={t.id}>{t.data.title} ({countBy((st) => st.themes.some((x) => x.id === t.id))})</option>)}
+          </select>
+        </label>
+        <label>Format
+          <select name="media" data-key="media">
+            <option value="">All formats</option>
+            {media.map((m) => <option value={m}>{mediaLabels[m]} ({countBy((st) => st.data.mediaType === m)})</option>)}
+          </select>
+        </label>
+        <button type="reset" class="button button--ghost">Clear filters</button>
+      </div>
     </form>
     <p class="filter-status" role="status" data-filter-status="stories"></p>
 
     <ul class="grid reveal-stagger">
       {s.stories.map((story) => (
-        <li class="reveal" data-filter-item="stories" data-countries={story.countries.map((c) => c.id).join(' ')} data-themes={story.themes.map((t) => t.id).join(' ')} data-media={story.data.mediaType}>
+        <li class="reveal" data-filter-item="stories" data-url={href(`/stories/${story.id}/`)} data-countries={story.countries.map((c) => c.id).join(' ')} data-themes={story.themes.map((t) => t.id).join(' ')} data-media={story.data.mediaType}>
           <StoryCard story={story} headingLevel="h2" />
         </li>
       ))}
@@ -52,6 +60,14 @@ const media = mediaTypes.filter((m) => s.stories.some((st) => st.data.mediaType 
 </BaseLayout>
 
 <style>
+  .story-filters__search { display: flex; flex-direction: column; gap: var(--space-1); max-width: 36rem; margin-bottom: var(--space-3); }
+  .story-filters__search label { font-size: var(--step--2); font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+  .story-filters__search input {
+    min-height: 52px; padding: 0.6rem 1.1rem 0.6rem 2.8rem; border: 2px solid var(--ink); border-radius: var(--radius-pill);
+    font: 500 var(--step-1) var(--font-ui); color: var(--ink);
+    background: var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%235c574f' stroke-width='2.4'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat 1rem center;
+  }
+  .story-filters__search input::placeholder { color: var(--muted); opacity: 1; }
   .empty { font-family: var(--font-serif); font-size: var(--step-2); padding: var(--space-6) 0; text-align: center; color: var(--muted); }
 </style>
 

@@ -16,13 +16,13 @@ const { resource } = Astro.props;
 const { Content } = await render(resource.entry);
 const d = resource.data;
 ---
-<BaseLayout title={d.title} description={d.description}>
+<BaseLayout title={d.title} description={d.description} searchType="Resource">
   <article class="wrap">
     <header class="page-head resource-head">
       <p class="eyebrow resource-head__kind">{resourceKindLabels[d.kind]}</p>
       <h1>{d.title}</h1>
       <p class="lede">{d.description}</p>
-      <dl class="meta">
+      <dl class="meta" data-pagefind-ignore>
         <div><dt>Ages</dt><dd>{d.ageGroup}</dd></div>
         <div><dt>Time</dt><dd>{d.duration}</dd></div>
       </dl>
@@ -30,7 +30,7 @@ const d = resource.data;
     </header>
     <div class="editorial resource-body"><Content /></div>
     {resource.stories.length > 0 && (
-      <section class="section" aria-labelledby="related-heading">
+      <section class="section" aria-labelledby="related-heading" data-pagefind-ignore>
         <SectionHead index={1} id="related-heading" title="Related stories" />
         <ul class="grid reveal-stagger">{resource.stories.map((story) => <li class="reveal"><StoryCard story={story} /></li>)}</ul>
       </section>

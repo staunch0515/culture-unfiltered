@@ -28,6 +28,11 @@ const countries = defineCollection({
     flag: nonEmpty.max(16).describe('Flag emoji, used in navigation only'),
     lat: z.number().min(-90).max(90),
     lng: z.number().min(-180).max(180),
+    iso: z
+      .string()
+      .regex(/^\d{3}$/, 'ISO 3166-1 numeric code: exactly three digits')
+      .optional()
+      .describe('Optional: highlights the country outline on the map'),
     order: z.number().int().default(100),
   }),
 });

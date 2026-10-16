@@ -1,5 +1,5 @@
 ---
-import { Image } from 'astro:assets';
+import { Image, getImage } from 'astro:assets';
 import { render } from 'astro:content';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import VideoEmbed from '@/components/VideoEmbed.astro';
@@ -23,12 +23,13 @@ const { Content } = await render(story.entry);
 const d = story.data;
 const resources = s.resourcesFor(story.id);
 const related = s.relatedTo(story.id);
+const thumb = await getImage({ src: d.thumbnail, width: 240 });
 const words = (story.entry.body ?? '').split(/\s+/).filter(Boolean).length;
 const minutes = Math.max(1, Math.round(words / 200));
 let n = 0;
 const next = () => ++n;
 ---
-<BaseLayout title={d.title} description={d.description}>
+<BaseLayout title={d.title} description={d.description} searchType="Story" searchImage={thumb.src}>
   <article class="story">
     <header class="wrap story-head">
       <p class="eyebrow story-head__meta">
@@ -138,14 +139,14 @@ const next = () => ++n;
     )}
 
     {resources.length > 0 && (
-      <section class="wrap section" aria-labelledby="resources-heading">
+      <section class="wrap section" aria-labelledby="resources-heading" data-pagefind-ignore>
         <SectionHead index={next()} id="resources-heading" title="Use this story in class" />
         <ul class="grid reveal-stagger">{resources.map((r) => <li class="reveal"><ResourceCard resource={r} /></li>)}</ul>
       </section>
     )}
 
     {related.length > 0 && (
-      <section class="wrap section" aria-labelledby="related-heading">
+      <section class="wrap section" aria-labelledby="related-heading" data-pagefind-ignore>
         <SectionHead index={next()} id="related-heading" title="Keep exploring" link={{ href: href('/stories/'), label: 'All stories' }} />
         <ul class="grid reveal-stagger">{related.map((r) => <li class="reveal"><StoryCard story={r} /></li>)}</ul>
       </section>

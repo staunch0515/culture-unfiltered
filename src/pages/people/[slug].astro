@@ -1,5 +1,5 @@
 ---
-import { Image } from 'astro:assets';
+import { Image, getImage } from 'astro:assets';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import StoryCard from '@/components/StoryCard.astro';
 import CountryLabel from '@/components/CountryLabel.astro';
@@ -17,10 +17,11 @@ const s = await loadSite();
 const stories = s.storiesBy(person.id);
 const themes = s.themesOf(person.id);
 const d = person.data;
+const thumb = await getImage({ src: d.photo, width: 160, height: 160 });
 let n = 0;
 const next = () => ++n;
 ---
-<BaseLayout title={d.name} description={d.bio}>
+<BaseLayout title={d.name} description={d.bio} searchType="Person" searchImage={thumb.src}>
   <article>
     <header class="wrap profile">
       <div class="profile__photo">

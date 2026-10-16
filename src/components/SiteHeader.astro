@@ -14,6 +14,10 @@ const isCurrent = (path: string) => {
       <span class="brand__mark" aria-hidden="true"></span>
       <span>Culture, <span class="brand__accent">Unfiltered</span></span>
     </a>
+    <a class="search-link" href={href('/search/')} aria-current={isCurrent('/search/') ? 'page' : undefined}>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" stroke-linecap="round" /></svg>
+      <span class="search-link__label">Search</span>
+    </a>
     <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
       <span class="menu-toggle__icon" aria-hidden="true"><span></span></span>
       <span class="menu-toggle__label">Menu</span>
@@ -92,6 +96,13 @@ const isCurrent = (path: string) => {
   .menu-toggle[aria-expanded='true'] .menu-toggle__icon span { opacity: 0; }
   .menu-toggle[aria-expanded='true'] .menu-toggle__icon::after { transform: translateY(-5px) rotate(-45deg); }
 
+  .site-nav { order: 1; margin-left: auto; }
+  .search-link {
+    order: 2; display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem;
+    min-width: 44px; min-height: 44px; padding: 0 0.25rem; color: var(--ink); text-decoration: none;
+    font-size: var(--step--2); font-weight: 700; font-stretch: 110%; letter-spacing: 0.12em; text-transform: uppercase;
+  }
+  .search-link:hover, .search-link[aria-current='page'] { color: var(--accent); }
   .site-nav ul { display: flex; flex-wrap: wrap; gap: 0 var(--space-4); list-style: none; margin: 0; padding: 0; }
   .site-nav a {
     position: relative; display: inline-block; padding: var(--space-2) 0;
@@ -106,8 +117,11 @@ const isCurrent = (path: string) => {
   .site-nav a[aria-current='page'] { color: var(--accent); }
 
   @media (max-width: 63.99rem) {
+    .search-link { order: 0; margin-left: auto; }
+    .search-link__label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+    .menu-toggle { order: 0; }
     :global(.js) .menu-toggle { display: inline-flex; }
-    :global(.js) .site-nav { display: none; flex-basis: 100%; padding-bottom: var(--space-4); }
+    :global(.js) .site-nav { display: none; flex-basis: 100%; margin-left: 0; padding-bottom: var(--space-4); }
     :global(.js) .site-nav.is-open { display: block; animation: nav-in var(--dur-2) var(--ease-out); }
     .site-nav ul { flex-direction: column; }
     .site-nav a {
@@ -121,6 +135,8 @@ const isCurrent = (path: string) => {
   @media (max-width: 30rem) {
     .brand { font-size: 0.82rem; font-stretch: 112%; gap: 0.45rem; }
     .brand__mark { width: 0.7rem; height: 0.7rem; box-shadow: 0.35rem 0 0 0 var(--ink); margin-right: 0.35rem; }
-    .menu-toggle { padding: 0 0.75rem; }
+    .menu-toggle { width: 44px; padding: 0; justify-content: center; }
+    .menu-toggle__label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+    .site-header__inner { gap: 0 var(--space-2); }
   }
 </style>

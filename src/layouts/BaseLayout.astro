@@ -5,13 +5,20 @@ import SiteHeader from '@/components/SiteHeader.astro';
 import SiteFooter from '@/components/SiteFooter.astro';
 import { site } from '@/lib/site';
 
+export type SearchType = 'Story' | 'Person' | 'Theme' | 'Resource' | 'Page';
+
 interface Props {
   title?: string;
   description?: string;
-  /** Pagefind: set false on pages that should not appear in search results. */
-  searchable?: boolean;
+  /**
+   * Pagefind: the result type for this page. Pages without one (home, listings,
+   * search, 404) are left out of the index so results never duplicate.
+   */
+  searchType?: SearchType | undefined;
+  /** Pagefind: thumbnail URL shown next to this page in search results. */
+  searchImage?: string | undefined;
 }
-const { title, description = site.description, searchable = true } = Astro.props;
+const { title, description = site.description, searchType, searchImage } = Astro.props;
 const fullTitle = title ? `${title} · ${site.name}` : `${site.name}: ${site.tagline}`;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 ---
@@ -29,6 +36,9 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
     <meta name="theme-color" content="#f6f3ec" />
+    {searchType && <meta data-pagefind-filter="type[content]" content={searchType} />}
+    {searchType && <meta data-pagefind-meta="type[content]" content={searchType} />}
+    {searchType && searchImage && <meta data-pagefind-meta="image[content]" content={searchImage} />}
     <script is:inline>document.documentElement.classList.add('js');</script>
   </head>
   <body>
@@ -37,7 +47,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
       <p class="sample-notice"><span class="sample-notice__dot" aria-hidden="true"></span>Preview: all people and stories are placeholders</p>
     )}
     <SiteHeader />
-    <main id="main" tabindex="-1" data-pagefind-body={searchable ? '' : undefined}>
+    <main id="main" tabindex="-1" data-pagefind-body={searchType ? '' : undefined}>
       <slot />
     </main>
     <SiteFooter />

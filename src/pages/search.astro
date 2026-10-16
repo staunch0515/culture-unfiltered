@@ -1,0 +1,165 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+
+const types = [
+  { value: '', label: 'Everything' },
+  { value: 'Story', label: 'Stories' },
+  { value: 'Person', label: 'People' },
+  { value: 'Theme', label: 'Themes' },
+  { value: 'Resource', label: 'Resources' },
+  { value: 'Page', label: 'Pages' },
+];
+---
+<BaseLayout title="Search" description="Search every story, person, theme and resource in Culture, Unfiltered.">
+  <div class="wrap">
+    <header class="page-head search-head">
+      <p class="eyebrow">Find anything</p>
+      <h1>Search</h1>
+      <form class="search-form" role="search" action="" method="get" data-search-form>
+        <label for="search-q" class="visually-hidden">Search the exhibition</label>
+        <div class="search-form__field">
+          <svg class="search-form__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" stroke-linecap="round" /></svg>
+          <input id="search-q" name="q" type="search" placeholder="Try “home”, “food” or a name" autocomplete="off" spellcheck="false" />
+          <button class="button" type="submit">Search</button>
+        </div>
+        <fieldset class="chips search-types">
+          <legend>Show</legend>
+          {types.map((t, i) => (
+            <label class="chip"><input type="radio" name="type" value={t.value} checked={i === 0} /><span>{t.label}</span></label>
+          ))}
+        </fieldset>
+      </form>
+    </header>
+
+    <p class="filter-status" role="status" data-search-status></p>
+    <ol class="results" data-search-results></ol>
+    <noscript><p>Search needs JavaScript. You can browse <a href="/stories/">stories</a>, <a href="/people/">people</a> and <a href="/themes/">themes</a> instead.</p></noscript>
+  </div>
+</BaseLayout>
+
+<script>
+  import { searchSite } from '@/scripts/pagefind';
+
+  const form = document.querySelector<HTMLFormElement>('[data-search-form]')!;
+  const input = form.querySelector<HTMLInputElement>('input[name="q"]')!;
+  const status = document.querySelector<HTMLElement>('[data-search-status]')!;
+  const list = document.querySelector<HTMLOListElement>('[data-search-results]')!;
+  const labels: Record<string, string> = { Story: 'Story', Person: 'Person', Theme: 'Theme', Resource: 'Resource', Page: 'Page' };
+  let token = 0;
+  let debounce: number | undefined;
+
+  const typeValue = () => form.querySelector<HTMLInputElement>('input[name="type"]:checked')?.value ?? '';
+
+  function render(hits: Awaited<ReturnType<typeof searchSite>>, q: string) {
+    list.replaceChildren();
+    if (hits === null) {
+      status.textContent = 'Search works on the published site. It is not available in this preview.';
+      return;
+    }
+    status.textContent = q ? `${hits.length} ${hits.length === 1 ? 'result' : 'results'} for “${q}”` : '';
+    for (const hit of hits) {
+      const li = document.createElement('li');
+      li.className = 'result';
+      // Only stories and people have meaningful thumbnails.
+      if (hit.meta.image && (hit.meta.type === 'Story' || hit.meta.type === 'Person')) {
+        const img = document.createElement('img');
+        img.src = hit.meta.image;
+        img.alt = '';
+        img.width = 96;
+        img.height = 96;
+        img.loading = 'lazy';
+        img.className = 'result__thumb';
+        li.append(img);
+      }
+      const body = document.createElement('div');
+      const type = document.createElement('p');
+      type.className = 'eyebrow result__type';
+      type.textContent = labels[hit.meta.type ?? ''] ?? 'Page';
+      const h = document.createElement('h2');
+      h.className = 'result__title';
+      const a = document.createElement('a');
+      a.href = hit.url;
+      a.textContent = hit.meta.title ?? hit.url;
+      h.append(a);
+      const excerpt = document.createElement('p');
+      excerpt.className = 'result__excerpt';
+      // Excerpts come from this site's own build-time index; they contain only <mark> tags.
+      excerpt.innerHTML = hit.excerpt;
+      body.append(type, h, excerpt);
+      li.append(body);
+      list.append(li);
+    }
+  }
+
+  async function run(updateUrl: boolean) {
+    const q = input.value.trim();
+    const type = typeValue();
+    const mine = ++token;
+    if (updateUrl) {
+      const url = new URL(location.href);
+      url.searchParams.delete('q');
+      url.searchParams.delete('type');
+      if (q) url.searchParams.set('q', q);
+      if (type) url.searchParams.set('type', type);
+      history.replaceState(null, '', url);
+    }
+    if (!q) {
+      list.replaceChildren();
+      status.textContent = '';
+      return;
+    }
+    const hits = await searchSite(q, type ? { type } : {});
+    if (mine === token) render(hits, q);
+  }
+
+  const params = new URLSearchParams(location.search);
+  input.value = params.get('q') ?? '';
+  const initialType = params.get('type');
+  if (initialType) {
+    const radio = form.querySelector<HTMLInputElement>(`input[name="type"][value="${CSS.escape(initialType)}"]`);
+    if (radio) radio.checked = true;
+  }
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    window.clearTimeout(debounce);
+    void run(true);
+  });
+  input.addEventListener('input', () => {
+    window.clearTimeout(debounce);
+    debounce = window.setTimeout(() => void run(true), 200);
+  });
+  form.addEventListener('change', (e) => {
+    if ((e.target as HTMLElement).matches('input[name="type"]')) void run(true);
+  });
+  void run(false);
+</script>
+
+<style>
+  .search-head h1 { margin-bottom: var(--space-5); }
+  .search-form__field {
+    display: flex; align-items: center; gap: var(--space-2); max-width: 46rem;
+    background: var(--surface); border: 2px solid var(--ink); border-radius: var(--radius-pill);
+    padding: 0.35rem 0.35rem 0.35rem 1.1rem; margin-bottom: var(--space-4);
+  }
+  .search-form__field:focus-within { outline: 3px solid var(--focus); outline-offset: 3px; }
+  .search-form__icon { flex: none; color: var(--muted); }
+  .search-form__field input {
+    flex: 1; min-width: 0; border: 0; background: transparent; outline: none;
+    font: 500 var(--step-1) var(--font-ui); color: var(--ink); padding: 0.5rem 0;
+  }
+  .search-form__field input::placeholder { color: var(--muted); opacity: 1; }
+  .search-types { margin-bottom: 0; }
+  .results { list-style: none; padding: 0; margin: 0; max-width: 52rem; }
+  .results :global(.result) {
+    display: grid; grid-template-columns: auto 1fr; gap: var(--space-4); align-items: start;
+    padding: var(--space-4) 0; border-top: 1px solid var(--line);
+  }
+  .results :global(.result__thumb) { width: 4.5rem; height: 4.5rem; object-fit: cover; border-radius: var(--radius); background: var(--paper-2); }
+  .results :global(.result > div:only-child) { grid-column: 1 / -1; }
+  .results :global(.result__type) { margin-bottom: var(--space-1); color: var(--accent); }
+  .results :global(.result__title) { font-size: var(--step-2); margin-bottom: var(--space-2); }
+  .results :global(.result__title a) { color: var(--ink); text-decoration: none; }
+  .results :global(.result__title a:hover) { color: var(--accent); text-decoration: underline; }
+  .results :global(.result__excerpt) { font-family: var(--font-serif); color: var(--ink-soft); margin: 0; }
+  .results :global(mark) { background: var(--accent-tint); color: var(--ink); padding: 0 0.1em; border-radius: 2px; }
+</style>

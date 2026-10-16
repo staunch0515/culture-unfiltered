@@ -16,7 +16,7 @@ const s = await loadSite();
 const groups = s.contributionsByCountry(theme.id);
 const stories = s.storiesAbout(theme.id);
 ---
-<BaseLayout title={theme.data.title} description={theme.data.question}>
+<BaseLayout title={theme.data.title} description={theme.data.question} searchType="Theme">
   <div class="wrap">
     <header class="theme-head">
       <p class="eyebrow"><span class="theme-head__emoji" aria-hidden="true">{theme.data.emoji}</span> Theme</p>
@@ -55,7 +55,7 @@ const stories = s.storiesAbout(theme.id);
     </section>
 
     {stories.length > 0 && (
-      <section class="section" aria-labelledby="stories-heading">
+      <section class="section" aria-labelledby="stories-heading" data-pagefind-ignore>
         <SectionHead index={2} id="stories-heading" title={`Stories about ${theme.data.title.toLowerCase()}`} />
         <ul class="grid reveal-stagger">{stories.map((story) => <li class="reveal"><StoryCard story={story} /></li>)}</ul>
       </section>
