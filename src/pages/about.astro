@@ -1,0 +1,20 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { loadSite } from '@/lib/content';
+import { site } from '@/lib/site';
+import { href, listJoin } from '@/lib/url';
+const s = await loadSite();
+---
+<BaseLayout title="About" description="About Culture, Unfiltered: who we are and why we made it.">
+  <div class="wrap prose">
+    <h1>About</h1>
+    <p class="lede">{site.name} is a digital anthropology exhibition made by teenagers in {listJoin(s.activeCountries.map((c) => c.data.name))}.</p>
+    <h2>Why we made it</h2>
+    <p>Most of what we learn about other countries comes from news, films and stereotypes. We wanted to hear from people our own age, about ordinary days, in their own words.</p>
+    <h2>Who we are</h2>
+    <p>We are {s.people.length} young people who met online. We share first names only, and we never publish schools, addresses or anything that could locate us.</p>
+    <p><a href={href('/people/')}>Meet the people</a> · <a href={href('/method/')}>Read our method</a></p>
+    <h2>Safety and privacy</h2>
+    <p>Every participant and their guardian agreed to what is published here. Anyone can ask for their story to be changed or removed at any time.</p>
+  </div>
+</BaseLayout>

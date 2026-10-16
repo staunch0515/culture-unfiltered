@@ -1,0 +1,42 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { href } from '@/lib/url';
+
+const principles = [
+  { title: 'Personal, not national', text: 'We tell our own stories. Nobody speaks for a whole country, and no story is the "typical" one.' },
+  { title: 'Many voices on one question', text: 'Every theme starts with a single question. We answer it side by side so the differences and the similarities both show.' },
+  { title: 'Made by young people', text: 'Teenagers choose the questions, film, write, edit and decide what gets published. Adults help, they do not direct.' },
+  { title: 'Consent and care', text: 'Everyone chooses what to share. We use first names only, never schools or addresses, and anyone can withdraw a story.' },
+  { title: 'Reflect, do not judge', text: 'Every story ends with three questions: what surprised us, what we assumed, and what we learned.' },
+];
+---
+<BaseLayout title="Our Method" description="How we make Culture, Unfiltered: five principles for telling personal stories.">
+  <div class="wrap">
+    <h1>Our Method</h1>
+    <p class="lede">Culture, Unfiltered works like a small anthropology project. We observe everyday life, ask good questions, and listen more than we explain.</p>
+
+    <h2>Five principles</h2>
+    <ol class="principles">
+      {principles.map((p) => (
+        <li><h3>{p.title}</h3><p>{p.text}</p></li>
+      ))}
+    </ol>
+
+    <h2>How a story gets made</h2>
+    <ol class="prose">
+      <li>We pick a theme and agree on one question.</li>
+      <li>Each participant answers it in their own format: video, writing, photos, an interview or audio.</li>
+      <li>We meet online, share drafts, and give each other feedback.</li>
+      <li>Every contributor approves the final version before it is published.</li>
+      <li>We finish with a reflection: what surprised us, what we assumed, what we learned.</li>
+    </ol>
+    <p><a href={href('/resources/')}>Use our method in your classroom</a></p>
+  </div>
+</BaseLayout>
+
+<style>
+  .principles { list-style: none; padding: 0; counter-reset: p; display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); }
+  .principles li { counter-increment: p; border-top: 3px solid var(--color-text); padding-top: var(--space-3); }
+  .principles li::before { content: counter(p, decimal-leading-zero); font-weight: 700; color: var(--color-accent); }
+  .principles p { margin: 0; }
+</style>

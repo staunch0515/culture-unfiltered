@@ -1,0 +1,15 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import ResourceCard from '@/components/ResourceCard.astro';
+import { loadSite } from '@/lib/content';
+const s = await loadSite();
+---
+<BaseLayout title="Resources" description="Free classroom activities, discussion guides and reflection prompts built around our stories.">
+  <div class="wrap">
+    <h1>Resources</h1>
+    <p class="lede">Free activities for classrooms, clubs and curious people. Each one builds on stories from this site.</p>
+    <ul class="grid">
+      {s.resources.map((r) => <li><ResourceCard resource={r} headingLevel="h2" /></li>)}
+    </ul>
+  </div>
+</BaseLayout>

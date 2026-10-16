@@ -1,0 +1,72 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import StoryCard from '@/components/StoryCard.astro';
+import ThemeCard from '@/components/ThemeCard.astro';
+import PersonCard from '@/components/PersonCard.astro';
+import WorldMap from '@/components/WorldMap.astro';
+import { loadSite } from '@/lib/content';
+import { site } from '@/lib/site';
+import { href } from '@/lib/url';
+
+const s = await loadSite();
+const [featured, ...rest] = s.stories;
+const mapData = s.activeCountries.map((country) => ({ country, count: s.peopleIn(country.id).length }));
+---
+<BaseLayout>
+  <section class="hero wrap">
+    <p class="eyebrow">A digital anthropology exhibition by teenagers</p>
+    <h1>{site.name}</h1>
+    <p class="lede">
+      {s.people.length} young people in {s.activeCountries.length} countries, telling their own stories about everyday life.
+      Not countries. Not stereotypes. Just people.
+    </p>
+    <p><a class="button" href={href('/stories/')}>Explore the stories</a></p>
+  </section>
+
+  {featured && (
+    <section class="section wrap" aria-labelledby="featured-heading">
+      <h2 id="featured-heading">Featured story</h2>
+      <StoryCard story={featured} />
+    </section>
+  )}
+
+  <section class="section wrap" aria-labelledby="themes-heading">
+    <h2 id="themes-heading">Themes</h2>
+    <p class="lede">Each theme starts with one question that every one of us answered.</p>
+    <ul class="grid">
+      {s.themes.map((t) => <li><ThemeCard theme={t} storyCount={s.storiesAbout(t.id).length} /></li>)}
+    </ul>
+  </section>
+
+  <section class="section wrap" aria-labelledby="people-heading">
+    <h2 id="people-heading">The people</h2>
+    <ul class="grid">
+      {s.people.map((p) => <li><PersonCard person={p} /></li>)}
+    </ul>
+    <p><a href={href('/people/')}>Meet everyone</a></p>
+  </section>
+
+  <section class="section wrap" aria-labelledby="map-heading">
+    <h2 id="map-heading">Where we are</h2>
+    <WorldMap countries={mapData} headingId="map-heading" />
+  </section>
+
+  {rest.length > 0 && (
+    <section class="section wrap" aria-labelledby="latest-heading">
+      <h2 id="latest-heading">More stories</h2>
+      <ul class="grid">
+        {rest.slice(0, 3).map((story) => <li><StoryCard story={story} /></li>)}
+      </ul>
+    </section>
+  )}
+
+  <section class="section wrap" aria-labelledby="method-heading">
+    <h2 id="method-heading">How we work</h2>
+    <p class="prose">We tell personal stories, not national ones. Every participant speaks for themselves, and nobody speaks for a whole country.</p>
+    <p><a href={href('/method/')}>Read about our method</a></p>
+  </section>
+</BaseLayout>
+
+<style>
+  .hero { padding-block: var(--space-6) var(--space-4); }
+</style>

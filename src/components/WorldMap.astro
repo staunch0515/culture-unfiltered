@@ -1,0 +1,55 @@
+---
+/**
+ * Lightweight SVG map: no tiles, no third-party requests. Every marker comes
+ * from country data (lat/lng), so a new country file adds a new marker.
+ * Stage 1 draws a graticule only; Stage 3 adds coastlines.
+ */
+import type { Country } from '@/lib/content';
+import { href } from '@/lib/url';
+
+interface Props {
+  countries: { country: Country; count: number }[];
+  headingId?: string;
+}
+const { countries, headingId } = Astro.props;
+const W = 1000, H = 500;
+// Equirectangular projection.
+const project = (lat: number, lng: number) => ({ x: ((lng + 180) / 360) * W, y: ((90 - lat) / 180) * H });
+const lats = [-60, -30, 0, 30, 60];
+const lngs = [-120, -60, 0, 60, 120];
+---
+<figure class="world-map">
+  <svg viewBox={`0 0 ${W} ${H}`} role="group" aria-labelledby={headingId}>
+    <rect width={W} height={H} rx="16" class="world-map__sea" />
+    {lats.map((lat) => <line x1="0" x2={W} y1={project(lat, 0).y} y2={project(lat, 0).y} class="world-map__grid" />)}
+    {lngs.map((lng) => <line y1="0" y2={H} x1={project(0, lng).x} x2={project(0, lng).x} class="world-map__grid" />)}
+    {countries.map(({ country, count }) => {
+      const { x, y } = project(country.data.lat, country.data.lng);
+      return (
+        <a href={href(`/people/?country=${country.id}`)} class="world-map__marker" data-country={country.id}>
+          <title>{`${country.data.name}: ${count} ${count === 1 ? 'participant' : 'participants'}`}</title>
+          <circle cx={x} cy={y} r="14" />
+          <text x={x} y={y - 22} text-anchor="middle">{country.data.name}</text>
+        </a>
+      );
+    })}
+  </svg>
+  <figcaption class="visually-hidden">Map of participant countries. Each marker links to the people from that country.</figcaption>
+</figure>
+<ul class="world-map__list">
+  {countries.map(({ country, count }) => (
+    <li><a href={href(`/people/?country=${country.id}`)}><span aria-hidden="true">{country.data.flag}</span> {country.data.name}</a> <span class="muted">({count})</span></li>
+  ))}
+</ul>
+
+<style>
+  .world-map { margin: 0; }
+  .world-map svg { width: 100%; height: auto; }
+  .world-map__sea { fill: #eef1f3; }
+  .world-map__grid { stroke: #d5dade; stroke-width: 1; }
+  .world-map__marker circle { fill: var(--color-accent); stroke: #fff; stroke-width: 3; }
+  .world-map__marker text { font: 600 18px var(--font-body); fill: var(--color-text); paint-order: stroke; stroke: #fff; stroke-width: 4px; }
+  .world-map__marker:hover circle, .world-map__marker:focus-visible circle { fill: var(--color-text); }
+  .world-map__marker:focus-visible { outline: 3px solid var(--color-focus); }
+  .world-map__list { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-4); list-style: none; padding: 0; margin: var(--space-3) 0 0; }
+</style>

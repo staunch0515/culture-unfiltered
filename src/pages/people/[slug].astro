@@ -1,0 +1,72 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import StoryCard from '@/components/StoryCard.astro';
+import CountryLabel from '@/components/CountryLabel.astro';
+import { loadSite, type Person } from '@/lib/content';
+import { href } from '@/lib/url';
+
+export async function getStaticPaths() {
+  const s = await loadSite();
+  return s.people.map((person) => ({ params: { slug: person.id }, props: { person } }));
+}
+interface Props { person: Person }
+const { person } = Astro.props;
+const s = await loadSite();
+const stories = s.storiesBy(person.id);
+const themes = s.themesOf(person.id);
+const d = person.data;
+---
+<BaseLayout title={d.name} description={d.bio}>
+  <article class="wrap">
+    <header class="profile">
+      <Image src={d.photo} alt={d.photoAlt} width={400} height={400} class="profile__photo" loading="eager" />
+      <div>
+        <p class="eyebrow"><CountryLabel country={person.country} /> · {d.location}</p>
+        <h1>{d.name}</h1>
+        <p class="lede">{d.bio}</p>
+      </div>
+    </header>
+
+    <dl class="facts">
+      <div><dt>Interests</dt><dd><ul class="tags">{d.interests.map((i) => <li class="tag">{i}</li>)}</ul></dd></div>
+      {d.languages.length > 0 && (
+        <div><dt>Languages</dt><dd><ul class="tags">{d.languages.map((l) => <li class="tag">{l}</li>)}</ul></dd></div>
+      )}
+      {themes.length > 0 && (
+        <div><dt>Themes</dt><dd><ul class="tags">{themes.map((t) => <li><a class="tag" href={href(`/themes/${t.id}/`)}><span aria-hidden="true">{t.data.emoji}</span> {t.data.title}</a></li>)}</ul></dd></div>
+      )}
+    </dl>
+
+    <section aria-labelledby="perspective-heading">
+      <h2 id="perspective-heading">My Perspective</h2>
+      <blockquote class="prose quote"><p>{d.perspective}</p></blockquote>
+    </section>
+
+    {stories.length > 0 && (
+      <section aria-labelledby="stories-heading">
+        <h2 id="stories-heading">Stories with {d.name}</h2>
+        <ul class="grid">{stories.map((story) => <li><StoryCard story={story} /></li>)}</ul>
+      </section>
+    )}
+
+    {d.reflection && (
+      <section aria-labelledby="reflection-heading">
+        <h2 id="reflection-heading">Reflection</h2>
+        <p class="prose">{d.reflection}</p>
+      </section>
+    )}
+
+    <p><a href={href('/people/')}>All people</a></p>
+  </article>
+</BaseLayout>
+
+<style>
+  .profile { display: grid; gap: var(--space-4); align-items: center; padding-block: var(--space-5) var(--space-3); }
+  .profile__photo { width: min(100%, 14rem); aspect-ratio: 1; border-radius: 50%; }
+  @media (min-width: 48rem) { .profile { grid-template-columns: 14rem 1fr; } }
+  .facts { display: grid; gap: var(--space-3); margin: var(--space-4) 0; }
+  .facts dt { font-weight: 600; margin-bottom: var(--space-1); }
+  .facts dd { margin: 0; }
+  .quote { margin: 0; font-family: var(--font-display); font-size: 1.35rem; border-left: 4px solid var(--color-accent); padding-left: var(--space-4); }
+</style>

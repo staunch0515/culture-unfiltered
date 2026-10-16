@@ -1,0 +1,12 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { href } from '@/lib/url';
+---
+<BaseLayout title="Page not found" searchable={false}>
+  <div class="wrap prose">
+    <h1>This page wandered off</h1>
+    <p class="lede">We could not find what you were looking for. It may have moved, or it may never have existed.</p>
+    <p><a class="button" href={href('/')}>Back to the start</a></p>
+    <p><a href={href('/stories/')}>Browse stories</a> · <a href={href('/people/')}>Meet the people</a></p>
+  </div>
+</BaseLayout>

@@ -1,0 +1,25 @@
+---
+import { site } from '@/lib/site';
+import { href } from '@/lib/url';
+---
+<footer class="site-footer">
+  <div class="wrap">
+    <p class="site-footer__name">{site.name}</p>
+    <p class="muted">{site.tagline}</p>
+    <nav aria-label="Footer">
+      <ul>
+        {site.nav.filter((n) => n.path !== '/').map((n) => <li><a href={href(n.path)}>{n.label}</a></li>)}
+        <li><a href={href('/map/')}>Map</a></li>
+      </ul>
+    </nav>
+    <p class="muted small">Made by young people. Participants are shown by first name only.</p>
+  </div>
+</footer>
+
+<style>
+  .site-footer { margin-top: var(--space-6); padding-block: var(--space-5); border-top: 1px solid var(--color-line); }
+  .site-footer__name { font-family: var(--font-display); font-weight: 700; font-size: 1.2rem; margin: 0; }
+  ul { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-4); list-style: none; padding: 0; margin: var(--space-3) 0; }
+  ul a { display: inline-block; padding-block: var(--space-1); }
+  .small { font-size: 0.875rem; }
+</style>

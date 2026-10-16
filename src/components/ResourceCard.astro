@@ -1,0 +1,15 @@
+---
+import type { Resource } from '@/lib/content';
+import { resourceKindLabels } from '@/lib/constants';
+import { href } from '@/lib/url';
+interface Props { resource: Resource; headingLevel?: 'h2' | 'h3' }
+const { resource, headingLevel: H = 'h3' } = Astro.props;
+---
+<article class="card resource-card" data-kind={resource.data.kind}>
+  <div class="card__body">
+    <p class="eyebrow">{resourceKindLabels[resource.data.kind]}</p>
+    <H><a class="card__link" href={href(`/resources/${resource.id}/`)}>{resource.data.title}</a></H>
+    <p>{resource.data.description}</p>
+    <p class="muted">Ages {resource.data.ageGroup} · {resource.data.duration}</p>
+  </div>
+</article>

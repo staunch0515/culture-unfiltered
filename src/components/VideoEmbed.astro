@@ -1,0 +1,66 @@
+---
+/**
+ * Click-to-load video. Before the click the page makes zero third-party
+ * requests: the poster is a local image, and the iframe (youtube-nocookie or
+ * Vimeo with dnt=1) is only created when the viewer presses play.
+ */
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+interface Props {
+  provider: 'youtube' | 'vimeo';
+  id: string;
+  title: string;
+  captions?: boolean;
+  poster?: ImageMetadata;
+  compact?: boolean;
+}
+const { provider, id, title, captions = false, poster, compact = false } = Astro.props;
+const src =
+  provider === 'youtube'
+    ? `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0${captions ? '&cc_load_policy=1' : ''}`
+    : `https://player.vimeo.com/video/${id}?autoplay=1&dnt=1`;
+const providerName = provider === 'youtube' ? 'YouTube' : 'Vimeo';
+---
+<figure class:list={['video', { 'video--compact': compact }]}>
+  <div class="video__frame" data-video-src={src} data-video-title={title}>
+    <button type="button" class="video__play">
+      {poster && <Image src={poster} alt="" width={1200} class="video__poster" loading="lazy" />}
+      <span class="video__icon" aria-hidden="true">▶</span>
+      <span class="video__label">Play video<span class="visually-hidden">: {title}</span></span>
+    </button>
+  </div>
+  <figcaption class="video__note">
+    Plays from {providerName}. Nothing loads from {providerName} until you press play.
+    {captions && <span> Captions available.</span>}
+  </figcaption>
+</figure>
+
+<script>
+  document.addEventListener('click', (event) => {
+    const button = (event.target as Element | null)?.closest<HTMLButtonElement>('.video__play');
+    const frame = button?.closest<HTMLElement>('[data-video-src]');
+    if (!button || !frame) return;
+    const iframe = document.createElement('iframe');
+    iframe.src = frame.dataset.videoSrc ?? '';
+    iframe.title = frame.dataset.videoTitle ?? 'Video';
+    iframe.allow = 'autoplay; fullscreen; picture-in-picture; encrypted-media';
+    iframe.allowFullscreen = true;
+    iframe.referrerPolicy = 'strict-origin-when-cross-origin';
+    frame.replaceChildren(iframe);
+    iframe.focus();
+  });
+</script>
+
+<style>
+  .video { margin: 0; }
+  .video__frame { position: relative; aspect-ratio: 16 / 9; background: #111; border-radius: var(--radius); overflow: hidden; }
+  .video__frame :global(iframe) { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+  .video__play { all: unset; position: absolute; inset: 0; cursor: pointer; display: grid; place-items: center; color: #fff; }
+  .video__play:focus-visible { outline: 3px solid var(--color-focus); outline-offset: -3px; }
+  .video__poster { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.75; }
+  .video__icon { position: relative; display: grid; place-items: center; width: 4.5rem; height: 4.5rem; border-radius: 50%; background: rgb(0 0 0 / 0.8); font-size: 1.6rem; padding-left: 0.3rem; }
+  .video__label { position: absolute; bottom: var(--space-3); left: var(--space-3); background: rgb(0 0 0 / 0.8); padding: var(--space-1) var(--space-3); border-radius: 999px; font-weight: 600; }
+  .video__note { font-size: 0.875rem; color: var(--color-muted); margin-top: var(--space-2); }
+  .video--compact .video__icon { width: 3rem; height: 3rem; font-size: 1.1rem; }
+</style>

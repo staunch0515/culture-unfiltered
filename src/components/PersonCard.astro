@@ -1,0 +1,19 @@
+---
+import { Image } from 'astro:assets';
+import CountryLabel from './CountryLabel.astro';
+import type { Person } from '@/lib/content';
+import { href } from '@/lib/url';
+interface Props { person: Person; headingLevel?: 'h2' | 'h3' }
+const { person, headingLevel: H = 'h3' } = Astro.props;
+---
+<article class="card person-card" data-country={person.country.id}>
+  <Image src={person.data.photo} alt={person.data.photoAlt} width={400} height={400} class="person-card__photo" />
+  <div class="card__body">
+    <H><a class="card__link" href={href(`/people/${person.id}/`)}>{person.data.name}</a></H>
+    <p class="muted"><CountryLabel country={person.country} /></p>
+    <p>{person.data.bio}</p>
+  </div>
+</article>
+<style>
+  .person-card__photo { width: 100%; aspect-ratio: 1; object-fit: cover; }
+</style>

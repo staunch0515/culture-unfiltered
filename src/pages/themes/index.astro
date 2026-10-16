@@ -1,0 +1,15 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import ThemeCard from '@/components/ThemeCard.astro';
+import { loadSite } from '@/lib/content';
+const s = await loadSite();
+---
+<BaseLayout title="Themes" description="The everyday themes we explore: one question, many answers.">
+  <div class="wrap">
+    <h1>Themes</h1>
+    <p class="lede">One question per theme. Answered by people in different places, side by side.</p>
+    <ul class="grid">
+      {s.themes.map((t) => <li><ThemeCard theme={t} storyCount={s.storiesAbout(t.id).length} headingLevel="h2" /></li>)}
+    </ul>
+  </div>
+</BaseLayout>

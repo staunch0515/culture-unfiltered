@@ -1,0 +1,14 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import WorldMap from '@/components/WorldMap.astro';
+import { loadSite } from '@/lib/content';
+const s = await loadSite();
+const mapData = s.activeCountries.map((country) => ({ country, count: s.peopleIn(country.id).length }));
+---
+<BaseLayout title="Map" description="Where the participants of Culture, Unfiltered live.">
+  <div class="wrap">
+    <h1 id="map-title">Where we are</h1>
+    <p class="lede">The map is just a way in. Choose a place to meet the people who live there.</p>
+    <WorldMap countries={mapData} headingId="map-title" />
+  </div>
+</BaseLayout>

@@ -1,0 +1,46 @@
+---
+import { render } from 'astro:content';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import StoryCard from '@/components/StoryCard.astro';
+import { loadSite, type Resource } from '@/lib/content';
+import { resourceKindLabels } from '@/lib/constants';
+import { href } from '@/lib/url';
+
+export async function getStaticPaths() {
+  const s = await loadSite();
+  return s.resources.map((resource) => ({ params: { slug: resource.id }, props: { resource } }));
+}
+interface Props { resource: Resource }
+const { resource } = Astro.props;
+const { Content } = await render(resource.entry);
+const d = resource.data;
+---
+<BaseLayout title={d.title} description={d.description}>
+  <article class="wrap">
+    <header class="head">
+      <p class="eyebrow">{resourceKindLabels[d.kind]}</p>
+      <h1>{d.title}</h1>
+      <p class="lede">{d.description}</p>
+      <dl class="meta">
+        <div><dt>Ages</dt><dd>{d.ageGroup}</dd></div>
+        <div><dt>Time</dt><dd>{d.duration}</dd></div>
+      </dl>
+      {d.pdf && <p><a class="button" href={d.pdf} download>Download PDF</a></p>}
+    </header>
+    <div class="prose"><Content /></div>
+    {resource.stories.length > 0 && (
+      <section aria-labelledby="related-heading">
+        <h2 id="related-heading">Related stories</h2>
+        <ul class="grid">{resource.stories.map((story) => <li><StoryCard story={story} /></li>)}</ul>
+      </section>
+    )}
+    <p><a href={href('/resources/')}>All resources</a></p>
+  </article>
+</BaseLayout>
+
+<style>
+  .head { padding-block: var(--space-5) var(--space-3); }
+  .meta { display: flex; gap: var(--space-5); margin: 0 0 var(--space-3); }
+  .meta dt { font-weight: 600; }
+  .meta dd { margin: 0; }
+</style>

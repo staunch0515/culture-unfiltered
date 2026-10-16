@@ -1,0 +1,29 @@
+---
+import { Image } from 'astro:assets';
+import type { Story } from '@/lib/content';
+import { mediaLabels } from '@/lib/constants';
+import { href, formatDate } from '@/lib/url';
+interface Props { story: Story; headingLevel?: 'h2' | 'h3' }
+const { story, headingLevel: H = 'h3' } = Astro.props;
+---
+<article
+  class="card story-card"
+  data-countries={story.countries.map((c) => c.id).join(' ')}
+  data-themes={story.themes.map((t) => t.id).join(' ')}
+  data-media={story.data.mediaType}
+>
+  <Image src={story.data.thumbnail} alt={story.data.thumbnailAlt} width={600} class="story-card__thumb" />
+  <div class="card__body">
+    <p class="eyebrow">{mediaLabels[story.data.mediaType]} · <time datetime={story.data.date.toISOString()}>{formatDate(story.data.date)}</time></p>
+    <H><a class="card__link" href={href(`/stories/${story.id}/`)}>{story.data.title}</a></H>
+    <p>{story.data.description}</p>
+    <p class="muted small">
+      By {story.contributors.map((p) => p.data.name).join(', ')}<span class="visually-hidden">, from</span>{' '}
+      <span aria-hidden="true">·</span>{' '}{story.countries.map((c) => c.data.name).join(', ')}
+    </p>
+  </div>
+</article>
+<style>
+  .story-card__thumb { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; }
+  .small { font-size: 0.875rem; }
+</style>

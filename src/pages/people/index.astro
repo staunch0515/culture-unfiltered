@@ -1,0 +1,38 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import PersonCard from '@/components/PersonCard.astro';
+import { loadSite } from '@/lib/content';
+
+const s = await loadSite();
+---
+<BaseLayout title="People" description="Meet the young people behind Culture, Unfiltered.">
+  <div class="wrap">
+    <h1>People</h1>
+    <p class="lede">Everyone here speaks for themselves, not for their country. Meet the people behind the stories.</p>
+
+    <form data-filter="people" data-noun="person" data-nouns="people" hidden>
+      <fieldset class="chips">
+        <legend>Filter by country</legend>
+        <label class="chip"><input type="radio" name="country" value="" data-key="country" checked /><span>All</span></label>
+        {s.activeCountries.map((c) => (
+          <label class="chip">
+            <input type="radio" name="country" value={c.id} data-key="country" />
+            <span><span aria-hidden="true">{c.data.flag}</span> {c.data.name}</span>
+          </label>
+        ))}
+      </fieldset>
+    </form>
+    <p class="muted" role="status" data-filter-status="people"></p>
+
+    <ul class="grid">
+      {s.people.map((p) => (
+        <li data-filter-item="people" data-country={p.country.id}><PersonCard person={p} headingLevel="h2" /></li>
+      ))}
+    </ul>
+  </div>
+</BaseLayout>
+
+<script>
+  import { initFilters } from '@/scripts/filters';
+  initFilters();
+</script>

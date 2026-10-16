@@ -1,0 +1,135 @@
+---
+import { Image } from 'astro:assets';
+import { render } from 'astro:content';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import VideoEmbed from '@/components/VideoEmbed.astro';
+import CountryLabel from '@/components/CountryLabel.astro';
+import ResourceCard from '@/components/ResourceCard.astro';
+import { loadSite, type Story } from '@/lib/content';
+import { mediaLabels } from '@/lib/constants';
+import { href, formatDate } from '@/lib/url';
+
+export async function getStaticPaths() {
+  const s = await loadSite();
+  return s.stories.map((story) => ({ params: { slug: story.id }, props: { story } }));
+}
+interface Props { story: Story }
+const { story } = Astro.props;
+const s = await loadSite();
+const { Content } = await render(story.entry);
+const d = story.data;
+const resources = s.resourcesFor(story.id);
+---
+<BaseLayout title={d.title} description={d.description}>
+  <article class="story">
+    <header class="wrap story__head">
+      <p class="eyebrow">{mediaLabels[d.mediaType]} · <time datetime={d.date.toISOString()}>{formatDate(d.date)}</time></p>
+      <h1>{d.title}</h1>
+      <p class="lede">{d.description}</p>
+      <p class="muted">By {story.contributors.map((p, i) => <>{i > 0 && ', '}<a href={href(`/people/${p.id}/`)}>{p.data.name}</a></>)}</p>
+    </header>
+
+    <div class="wrap story__media">
+      {d.video ? (
+        <VideoEmbed provider={d.video.provider} id={d.video.id} captions={d.video.captions} title={d.title} poster={d.thumbnail} />
+      ) : (
+        <Image src={d.thumbnail} alt={d.thumbnailAlt} width={1200} loading="eager" class="story__hero" />
+      )}
+      {d.audio && (
+        <figure class="audio">
+          <figcaption>Listen</figcaption>
+          <audio controls preload="none" src={d.audio.src}></audio>
+          {d.audio.transcript && (
+            <details><summary>Read the transcript</summary><p>{d.audio.transcript}</p></details>
+          )}
+        </figure>
+      )}
+    </div>
+
+    <div class="wrap prose story__body"><Content /></div>
+
+    {d.photos.length > 0 && (
+      <section class="wrap" aria-labelledby="photos-heading">
+        <h2 id="photos-heading">Photos</h2>
+        <ul class="photos">
+          {d.photos.map((photo) => (
+            <li><figure><Image src={photo.src} alt={photo.alt} width={800} />{photo.caption && <figcaption class="muted">{photo.caption}</figcaption>}</figure></li>
+          ))}
+        </ul>
+      </section>
+    )}
+
+    <section class="wrap" aria-labelledby="about-heading">
+      <h2 id="about-heading">About this story</h2>
+      <dl class="about">
+        <div><dt>Made by</dt><dd>{story.contributors.map((p, i) => <>{i > 0 && ', '}<a href={href(`/people/${p.id}/`)}>{p.data.name}</a></>)}</dd></div>
+        <div><dt>From</dt><dd>{story.countries.map((c, i) => <>{i > 0 && ', '}<CountryLabel country={c} /></>)}</dd></div>
+        <div><dt>Themes</dt><dd><ul class="tags">{story.themes.map((t) => <li><a class="tag" href={href(`/themes/${t.id}/`)}>{t.data.title}</a></li>)}</ul></dd></div>
+        <div><dt>Format</dt><dd>{mediaLabels[d.mediaType]}{d.video?.captions && ', with captions'}</dd></div>
+        <div><dt>Published</dt><dd>{formatDate(d.date)}</dd></div>
+      </dl>
+    </section>
+
+    {story.perspectives.length > 0 && (
+      <section class="wrap" aria-labelledby="perspectives-heading">
+        <h2 id="perspectives-heading">Perspectives</h2>
+        <ul class="perspectives">
+          {story.perspectives.map((p) => (
+            <li class="perspective">
+              <div class="perspective__who">
+                <Image src={p.person.data.photo} alt="" width={64} height={64} class="perspective__avatar" />
+                <div>
+                  <h3><a href={href(`/people/${p.person.id}/`)}>{p.person.data.name}</a></h3>
+                  <p class="muted"><CountryLabel country={p.person.country} /></p>
+                </div>
+              </div>
+              {p.text && <blockquote><p>{p.text}</p></blockquote>}
+              {p.video && <VideoEmbed provider={p.video.provider} id={p.video.id} title={`${p.person.data.name}'s perspective`} compact />}
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
+
+    {d.reflection && (
+      <section class="wrap" aria-labelledby="reflection-heading">
+        <h2 id="reflection-heading">Reflection</h2>
+        <dl class="reflection">
+          <div><dt>What surprised us?</dt><dd>{d.reflection.surprised}</dd></div>
+          <div><dt>What did we assume?</dt><dd>{d.reflection.assumed}</dd></div>
+          <div><dt>What did we learn?</dt><dd>{d.reflection.learned}</dd></div>
+        </dl>
+      </section>
+    )}
+
+    {resources.length > 0 && (
+      <section class="wrap" aria-labelledby="resources-heading">
+        <h2 id="resources-heading">Use this story in class</h2>
+        <ul class="grid">{resources.map((r) => <li><ResourceCard resource={r} /></li>)}</ul>
+      </section>
+    )}
+  </article>
+</BaseLayout>
+
+<style>
+  .story__head { padding-block: var(--space-5) var(--space-3); }
+  .story__hero { width: 100%; border-radius: var(--radius); }
+  .story__body { font-size: 1.1rem; margin-block: var(--space-4); }
+  .audio { margin: var(--space-3) 0 0; }
+  .audio audio { width: 100%; }
+  .photos { list-style: none; padding: 0; display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); }
+  .photos figure { margin: 0; }
+  .photos img { border-radius: var(--radius); }
+  .about, .reflection { display: grid; gap: var(--space-3); margin: 0; }
+  .about dt, .reflection dt { font-weight: 600; }
+  .about dd, .reflection dd { margin: 0; }
+  .reflection { grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); }
+  .reflection > div { border-top: 3px solid var(--color-text); padding-top: var(--space-3); }
+  .reflection dt { font-family: var(--font-display); font-size: 1.2rem; }
+  .perspectives { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); }
+  .perspective__who { display: flex; gap: var(--space-3); align-items: center; }
+  .perspective__who h3, .perspective__who p { margin: 0; }
+  .perspective__avatar { width: 3.5rem; height: 3.5rem; border-radius: 50%; }
+  .perspective blockquote { margin: var(--space-3) 0; font-family: var(--font-display); font-size: 1.15rem; }
+  .perspective blockquote p { margin: 0; }
+</style>

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" width="1200" height="675">
+  <rect width="1200" height="675" fill="#f4f1fb"/>
+  <rect x="1178" y="568" width="227" height="159" rx="12" fill="#3d348b" opacity="0.85" transform="rotate(-7 1178 568)"/>
+  <circle cx="284" cy="289" r="71" fill="#f18701" opacity="0.85"/>
+  <rect x="1069" y="611" width="272" height="190" rx="12" fill="#f7b801" opacity="0.85" transform="rotate(-8 1069 611)"/>
+  <circle cx="1109" cy="415" r="47" fill="#3d348b" opacity="0.85"/>
+  <rect x="82" y="426" width="234" height="164" rx="12" fill="#f18701" opacity="0.85" transform="rotate(-19 82 426)"/>
+  <circle cx="258" cy="394" r="33" fill="#f7b801" opacity="0.85"/>
+  <rect x="1015" y="13" width="266" height="186" rx="12" fill="#3d348b" opacity="0.85" transform="rotate(-1 1015 13)"/>
+  <rect x="32" y="603" width="287" height="40" rx="20" fill="#111" opacity="0.75"/>
+  <text x="52" y="630" font-family="system-ui, sans-serif" font-size="20" fill="#fff">Placeholder photo 4</text>
+</svg>

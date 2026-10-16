@@ -1,0 +1,54 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import StoryCard from '@/components/StoryCard.astro';
+import { loadSite } from '@/lib/content';
+import { mediaTypes, mediaLabels } from '@/lib/constants';
+
+const s = await loadSite();
+const countries = s.countries.filter((c) => s.stories.some((st) => st.countries.some((x) => x.id === c.id)));
+const themes = s.themes.filter((t) => s.storiesAbout(t.id).length > 0);
+const media = mediaTypes.filter((m) => s.stories.some((st) => st.data.mediaType === m));
+---
+<BaseLayout title="Stories" description="Videos, articles, photo essays, interviews and audio, made by young people.">
+  <div class="wrap">
+    <h1>Stories</h1>
+    <p class="lede">Videos, articles, photo essays, interviews and audio. Filter by country, theme or format.</p>
+
+    <form data-filter="stories" data-noun="story" data-nouns="stories" class="filters" hidden>
+      <label>Country
+        <select name="country" data-key="countries">
+          <option value="">All countries</option>
+          {countries.map((c) => <option value={c.id}>{c.data.flag} {c.data.name}</option>)}
+        </select>
+      </label>
+      <label>Theme
+        <select name="theme" data-key="themes">
+          <option value="">All themes</option>
+          {themes.map((t) => <option value={t.id}>{t.data.title}</option>)}
+        </select>
+      </label>
+      <label>Format
+        <select name="media" data-key="media">
+          <option value="">All formats</option>
+          {media.map((m) => <option value={m}>{mediaLabels[m]}</option>)}
+        </select>
+      </label>
+      <button type="reset" class="button">Clear filters</button>
+    </form>
+    <p class="muted" role="status" data-filter-status="stories"></p>
+
+    <ul class="grid">
+      {s.stories.map((story) => (
+        <li data-filter-item="stories" data-countries={story.countries.map((c) => c.id).join(' ')} data-themes={story.themes.map((t) => t.id).join(' ')} data-media={story.data.mediaType}>
+          <StoryCard story={story} headingLevel="h2" />
+        </li>
+      ))}
+    </ul>
+    <p data-filter-empty="stories" hidden>No stories match these filters yet. Try clearing one.</p>
+  </div>
+</BaseLayout>
+
+<script>
+  import { initFilters } from '@/scripts/filters';
+  initFilters();
+</script>
