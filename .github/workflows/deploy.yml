@@ -94,6 +94,20 @@ jobs:
             echo "Invalid image tag: $IMAGE_TAG" >&2
             exit 1
           fi
+      - name: Check required secrets
+        env:
+          SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
+          KNOWN_HOSTS: ${{ secrets.SERVER_KNOWN_HOSTS }}
+        run: |
+          missing=()
+          [[ -n "$SERVER_HOST" ]] || missing+=(SERVER_HOST)
+          [[ -n "$SERVER_USER" ]] || missing+=(SERVER_USER)
+          [[ -n "$SSH_KEY" ]] || missing+=(SERVER_SSH_KEY)
+          [[ -n "$KNOWN_HOSTS" ]] || missing+=(SERVER_KNOWN_HOSTS)
+          if (( ${#missing[@]} )); then
+            echo "::error::Missing repository secrets: ${missing[*]} (Settings > Secrets and variables > Actions)"
+            exit 1
+          fi
       - name: Configure SSH
         env:
           SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
