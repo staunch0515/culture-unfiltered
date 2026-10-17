@@ -11,7 +11,7 @@ const types = {
   '.mjs': 'text/javascript', '.json': 'application/json', '.svg': 'image/svg+xml',
   '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp',
   '.avif': 'image/avif', '.wav': 'audio/wav', '.mp3': 'audio/mpeg', '.pdf': 'application/pdf',
-  '.woff2': 'font/woff2', '.wasm': 'application/wasm', '.pf_meta': 'application/octet-stream',
+  '.woff2': 'font/woff2', '.yml': 'text/yaml', '.wasm': 'application/wasm', '.pf_meta': 'application/octet-stream',
 };
 
 async function resolveFile(urlPath) {

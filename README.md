@@ -13,6 +13,7 @@ Built with Astro (static), TypeScript strict and Astro content collections valid
 | `npm run build` | Type-check, validate all content against the schema, build to `dist/` |
 | `npm test` | Build the real site and a fixture site, then run Playwright smoke + axe tests at 375px and 1440px |
 | `npm run preview` | Serve `dist/` locally |
+| `npm run cms:local` | Local Decap CMS backend: with `npm run dev` running, open http://localhost:4321/admin/ |
 
 ## Content is data
 
@@ -32,6 +33,17 @@ id that does not exist fails the build.
 
 All relationships (a person's themes, a country's people, a theme's side-by-side comparison)
 are derived in `src/lib/content.ts`. Nothing is listed twice and no list is hard-coded.
+
+## Content editing (CMS)
+
+`/admin` runs Decap CMS. Editors log in with their own GitHub accounts (repository
+collaborators with Write access), so every change is a commit authored by the editor.
+The small stateless service in `cms-auth/` completes GitHub's OAuth login (it holds the
+OAuth client secret); it has no database.
+
+- Editor guides: [EDITORS.md](EDITORS.md) (English) · [EDITORS.zh-CN.md](EDITORS.zh-CN.md) (中文)
+- CMS fields: `src/pages/admin/config.yml.ts` (mirrors the schema; choice lists read content files)
+- Server setup and deployment: [DEPLOY.md](DEPLOY.md)
 
 ## Tests
 

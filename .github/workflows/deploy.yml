@@ -37,6 +37,8 @@ jobs:
         run: npm test
         env:
           ASTRO_TELEMETRY_DISABLED: "1"
+      - name: CMS auth service tests
+        run: npm --prefix cms-auth test
       - name: Upload Playwright report
         if: failure()
         uses: actions/upload-artifact@v4
@@ -62,17 +64,30 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - uses: docker/build-push-action@v6
+      - name: Build and push web image
+        uses: docker/build-push-action@v6
         with:
           context: .
           platforms: linux/amd64
           push: true
           tags: |
-            ${{ env.IMAGE }}:${{ github.sha }}
-            ${{ env.IMAGE }}:latest
+            ${{ env.IMAGE }}-web:${{ github.sha }}
+            ${{ env.IMAGE }}-web:latest
           labels: org.opencontainers.image.source=https://github.com/${{ github.repository }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=web
+          cache-to: type=gha,mode=max,scope=web
+      - name: Build and push CMS auth image
+        uses: docker/build-push-action@v6
+        with:
+          context: cms-auth
+          platforms: linux/amd64
+          push: true
+          tags: |
+            ${{ env.IMAGE }}-cms:${{ github.sha }}
+            ${{ env.IMAGE }}-cms:latest
+          labels: org.opencontainers.image.source=https://github.com/${{ github.repository }}
+          cache-from: type=gha,scope=cms
+          cache-to: type=gha,mode=max,scope=cms
 
   deploy:
     needs: build

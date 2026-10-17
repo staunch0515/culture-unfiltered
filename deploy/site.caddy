@@ -1,4 +1,11 @@
 cultureunfiltered.org {
     encode zstd gzip
-    reverse_proxy culture_unfiltered-web:8080
+
+    handle /cms-auth/* {
+        reverse_proxy culture_unfiltered-cms:8081
+    }
+
+    handle {
+        reverse_proxy culture_unfiltered-web:8080
+    }
 }

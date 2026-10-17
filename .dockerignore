@@ -1,6 +1,7 @@
 # Keep the build context small and free of local artifacts and secrets.
 .git
 .github
+cms-auth
 .claude
 .astro
 node_modules

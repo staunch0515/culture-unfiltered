@@ -21,6 +21,17 @@ const files = (folder: string, ext: string) =>
 
 const nonEmpty = z.string().trim().min(1);
 
+/**
+ * The CMS may save an untouched optional field as "" or as an object of empty
+ * values. Treat those as "not filled in" so they never break the build.
+ */
+const isBlank = (v: unknown): boolean =>
+  v === undefined || v === null || (typeof v === 'string' && v.trim() === '') ||
+  (typeof v === 'object' && !Array.isArray(v) &&
+    Object.values(v as Record<string, unknown>).every((x) => x === false || isBlank(x)));
+const optional = <T extends z.ZodType>(schema: T) =>
+  z.preprocess((v) => (isBlank(v) ? undefined : v), schema.optional());
+
 const countries = defineCollection({
   loader: files('countries', 'json'),
   schema: z.object({
@@ -28,11 +39,9 @@ const countries = defineCollection({
     flag: nonEmpty.max(16).describe('Flag emoji, used in navigation only'),
     lat: z.number().min(-90).max(90),
     lng: z.number().min(-180).max(180),
-    iso: z
-      .string()
-      .regex(/^\d{3}$/, 'ISO 3166-1 numeric code: exactly three digits')
-      .optional()
-      .describe('Optional: highlights the country outline on the map'),
+    iso: optional(z.string().regex(/^\d{3}$/, 'ISO 3166-1 numeric code: exactly three digits')).describe(
+      'Optional: highlights the country outline on the map',
+    ),
     order: z.number().int().default(100),
   }),
 });
@@ -52,7 +61,7 @@ const people = defineCollection({
       interests: z.array(nonEmpty).min(1),
       languages: z.array(nonEmpty).default([]),
       perspective: nonEmpty.describe('"My Perspective" paragraph'),
-      reflection: z.string().trim().optional(),
+      reflection: optional(z.string().trim()),
       published: z.boolean().default(true),
     }),
 });
@@ -80,33 +89,29 @@ const stories = defineCollection({
       mediaType: z.enum(mediaTypes),
       thumbnail: image(),
       thumbnailAlt: nonEmpty,
-      video: z
-        .object({
+      video: optional(
+        z.object({
           provider: z.enum(['youtube', 'vimeo']),
           id: z.string().regex(/^[A-Za-z0-9_-]{4,32}$/, 'Video id only, not a full URL'),
           captions: z.boolean().default(false),
-        })
-        .optional(),
-      audio: z
-        .object({ src: nonEmpty, transcript: z.string().trim().optional() })
-        .optional(),
-      photos: z.array(z.object({ src: image(), alt: nonEmpty, caption: z.string().optional() })).default([]),
+        }),
+      ),
+      audio: optional(z.object({ src: nonEmpty, transcript: optional(z.string().trim()) })),
+      photos: z.array(z.object({ src: image(), alt: nonEmpty, caption: optional(z.string()) })).default([]),
       perspectives: z
         .array(
           z
             .object({
               participant: reference('people'),
-              text: z.string().trim().optional(),
-              video: z
-                .object({ provider: z.enum(['youtube', 'vimeo']), id: z.string().regex(/^[A-Za-z0-9_-]{4,32}$/) })
-                .optional(),
+              text: optional(z.string().trim()),
+              video: optional(
+                z.object({ provider: z.enum(['youtube', 'vimeo']), id: z.string().regex(/^[A-Za-z0-9_-]{4,32}$/) }),
+              ),
             })
             .refine((p) => p.text || p.video, 'Each perspective needs text or a video'),
         )
         .default([]),
-      reflection: z
-        .object({ surprised: nonEmpty, assumed: nonEmpty, learned: nonEmpty })
-        .optional(),
+      reflection: optional(z.object({ surprised: nonEmpty, assumed: nonEmpty, learned: nonEmpty })),
       published: z.boolean().default(true),
     }),
 });
@@ -119,7 +124,7 @@ const resources = defineCollection({
     kind: z.enum(resourceKinds),
     ageGroup: nonEmpty,
     duration: nonEmpty,
-    pdf: z.string().trim().optional(),
+    pdf: optional(z.string().trim()),
     relatedStories: z.array(reference('stories')).default([]),
   }),
 });
