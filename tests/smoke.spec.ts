@@ -11,6 +11,7 @@ test('the build produced every expected section', () => {
 
 for (const route of routes) {
   test(`page ${route}`, async ({ page }) => {
+    test.setTimeout(60_000); // long pages plus a full axe scan
     const errors = trackErrors(page);
     // Reduced motion keeps scroll-reveal content fully opaque, so axe checks every element.
     await page.emulateMedia({ reducedMotion: 'reduce' });

@@ -1,10 +1,8 @@
 import { test, expect } from '@playwright/test';
-import { builtRoutes, SITE_ORIGIN } from './helpers';
+import { builtRoutes, SITE_ORIGIN, FIXTURE_ORIGIN as F } from './helpers';
 
 test('story pages make no third-party requests until play is pressed', async ({ page }) => {
-  const storyRoutes = builtRoutes('dist').filter((r) => /^\/stories\/.+/.test(r));
-  let videoPages = 0;
-  for (const route of storyRoutes) {
+  for (const route of builtRoutes('dist').filter((r) => /^\/stories\/.+/.test(r))) {
     const external: string[] = [];
     await page.route('**/*', (r) => {
       const url = r.request().url();
@@ -15,16 +13,23 @@ test('story pages make no third-party requests until play is pressed', async ({ 
     await page.goto(route);
     await page.waitForLoadState('networkidle');
     expect(external, `third-party requests on ${route} before play`).toEqual([]);
-
-    const play = page.locator('.video__play').first();
-    if (await play.count()) {
-      videoPages++;
-      await play.click();
-      const iframe = page.locator('.video__frame iframe').first();
-      await expect(iframe).toHaveAttribute('src', /^https:\/\/(www\.youtube-nocookie\.com|player\.vimeo\.com)\//);
-      await expect(iframe).toHaveAttribute('title', /.+/);
-    }
     await page.unrouteAll({ behavior: 'ignoreErrors' });
   }
-  expect(videoPages, 'at least one story has a video').toBeGreaterThan(0);
+});
+
+test('pressing play loads the privacy-friendly player', async ({ page }) => {
+  const external: string[] = [];
+  await page.route('**/*', (r) => {
+    const url = r.request().url();
+    if (url.startsWith(F) || url.startsWith('data:')) return r.continue();
+    external.push(url);
+    return r.abort();
+  });
+  await page.goto(`${F}/stories/fixture-video-diary/`);
+  await page.waitForLoadState('networkidle');
+  expect(external, 'nothing third-party before play').toEqual([]);
+  await page.locator('.video__play').first().click();
+  const iframe = page.locator('.video__frame iframe').first();
+  await expect(iframe).toHaveAttribute('src', /^https:\/\/www\.youtube-nocookie\.com\/embed\/aqz-KE-bpKQ/);
+  await expect(iframe).toHaveAttribute('title', /.+/);
 });

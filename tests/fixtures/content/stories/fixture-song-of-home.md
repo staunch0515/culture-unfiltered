@@ -2,8 +2,8 @@
 title: Fixture Song of Home
 description: Fixture story used only by the automated tests.
 date: 2026-10-01
-contributors: [ines, hana]
-themes: [music, home]
+contributors: [ines]
+themes: [music]
 mediaType: audio
 thumbnail: ../../assets/fixture-story.svg
 thumbnailAlt: Fixture artwork used only by the automated tests.

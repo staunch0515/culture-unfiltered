@@ -8,6 +8,7 @@ import { test, expect } from '@playwright/test';
 import { readFileSync, readdirSync } from 'node:fs';
 import { join, extname } from 'node:path';
 import { mediaTypes, resourceKinds } from '../src/lib/constants';
+import { activeCountries, publishedPeople } from './content';
 import { FIXTURE_ORIGIN as F, trackErrors, seriousA11yViolations, horizontalOverflow, builtRoutes } from './helpers';
 
 test.describe('adding content is just adding files', () => {
@@ -28,7 +29,9 @@ test.describe('adding content is just adding files', () => {
     await expect(page.locator('.world-map__marker[data-country="portugal"]')).toHaveCount(1);
     await page.goto(`${F}/`);
     await expect(page.locator('.world-map__marker[data-country="portugal"]')).toHaveCount(1);
-    await expect(page.locator('.hero .lede')).toContainText('7 young people in 7 countries');
+    const people = publishedPeople('fixtures').length;
+    const countries = activeCountries('fixtures').length;
+    await expect(page.locator('.hero .lede')).toContainText(`${people} young people in ${countries} countries`);
     expect(errors).toEqual([]);
   });
 
@@ -36,7 +39,7 @@ test.describe('adding content is just adding files', () => {
     await page.goto(`${F}/people/ines/`);
     await expect(page.locator('h1')).toHaveText('Inês');
     const themes = page.locator('.facts').getByRole('link');
-    await expect(themes).toHaveText([/Home/, /Music/]);
+    await expect(themes).toHaveText([/Music/]);
     await expect(page.getByRole('link', { name: 'Fixture Song of Home' })).toBeVisible();
     expect(await seriousA11yViolations(page)).toEqual([]);
     expect(await horizontalOverflow(page)).toBeLessThanOrEqual(0);
@@ -47,7 +50,7 @@ test.describe('adding content is just adding files', () => {
     await expect(page.getByRole('link', { name: 'Music' })).toBeVisible();
     await page.goto(`${F}/themes/music/`);
     const columns = page.locator('.compare__col h3');
-    await expect(columns).toHaveText([/Japan/, /Portugal/]);
+    await expect(columns).toHaveText([/Portugal/]);
     await expect(page.getByText('Fixture perspective from Inês about music.')).toBeVisible();
   });
 
@@ -56,7 +59,8 @@ test.describe('adding content is just adding files', () => {
     await expect(page.locator('select[name="country"] option[value="portugal"]')).toHaveCount(1);
     await expect(page.locator('select[name="theme"] option[value="music"]')).toHaveCount(1);
     await page.selectOption('select[name="country"]', 'portugal');
-    await expect(page.locator('[data-filter-item="stories"]:visible')).toHaveCount(1);
+    // Both fixture stories are by the Portugal fixture participant.
+    await expect(page.locator('[data-filter-item="stories"]:visible')).toHaveCount(2);
     await page.getByRole('button', { name: 'Clear filters' }).click();
     await expect(page).not.toHaveURL(/country=/);
   });

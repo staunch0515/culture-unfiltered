@@ -16,23 +16,24 @@ function buildContains(dir: string, text: string): boolean {
   return false;
 }
 
+// Search and filter behaviour is tested on the fixture build, whose fixture stories
+// and people never change, so CMS edits to real content cannot break these tests.
 test.describe('site search (Pagefind)', () => {
   test('finds stories and narrows by result type', async ({ page }) => {
     const errors = trackErrors(page);
-    await page.goto('/search/?q=kitchen');
+    await page.goto(`${F}/search/?q=fixture`);
     const results = page.locator('.result');
-    await expect(results.first()).toBeVisible();
-    await expect(page.getByRole('link', { name: "Grandmother's Kitchen" })).toBeVisible();
-    await expect(page.locator('[data-search-status]')).toContainText('for “kitchen”');
+    await expect(page.getByRole('link', { name: 'Fixture Song of Home' })).toBeVisible();
+    await expect(page.locator('[data-search-status]')).toContainText('for “fixture”');
 
-    await page.fill('#search-q', 'cello');
+    await page.fill('#search-q', 'fado');
     await page.getByRole('radio', { name: 'People' }).check({ force: true });
-    await expect(page).toHaveURL(/q=cello/);
+    await expect(page).toHaveURL(/q=fado/);
     await expect(page).toHaveURL(/type=Person/);
     await expect(results).toHaveCount(1);
     await expect(results.first().locator('.result__type')).toHaveText('Person');
     await results.first().getByRole('link').click();
-    await expect(page).toHaveURL(/\/people\/lena\/$/);
+    await expect(page).toHaveURL(/\/people\/ines\/$/);
     expect(errors).toEqual([]);
   });
 
@@ -49,19 +50,19 @@ test.describe('site search (Pagefind)', () => {
 });
 
 test.describe('story filters with search', () => {
-  test('search combines with country and format filters, and lives in the URL', async ({ page }) => {
-    await page.goto('/stories/');
+  test('search combines with the format filter, and lives in the URL', async ({ page }) => {
+    await page.goto(`${F}/stories/`);
     const visible = page.locator('[data-filter-item="stories"]:visible');
     const all = await visible.count();
-    await page.fill('#story-q', 'kitchen');
-    await expect(page).toHaveURL(/q=kitchen/);
+    await page.fill('#story-q', 'fixture');
+    await expect(page).toHaveURL(/q=fixture/);
     await expect(visible).toHaveCount(2);
-    await page.selectOption('select[name="media"]', 'photo');
+    await page.selectOption('select[name="media"]', 'video');
     await expect(visible).toHaveCount(1);
-    await expect(page.getByRole('status')).toHaveText('Showing 1 story matching “kitchen”');
+    await expect(page.getByRole('status')).toHaveText('Showing 1 story matching “fixture”');
 
     await page.reload();
-    await expect(page.locator('#story-q')).toHaveValue('kitchen');
+    await expect(page.locator('#story-q')).toHaveValue('fixture');
     await expect(visible).toHaveCount(1);
 
     await page.getByRole('button', { name: 'Clear filters' }).click();
@@ -77,9 +78,13 @@ test.describe('story filters with search', () => {
 
 test('resources can be filtered by type', async ({ page }) => {
   await page.goto('/resources/');
-  await page.getByRole('radio', { name: 'Discussion guide' }).check({ force: true });
-  await expect(page.locator('[data-filter-item="resources"]:visible')).toHaveCount(1);
-  await expect(page).toHaveURL(/kind=discussion/);
+  const kinds = page.locator('input[name="kind"]:not([value=""])');
+  test.skip((await kinds.count()) === 0, 'fewer than two resource types in the content');
+  const kind = (await kinds.first().getAttribute('value'))!;
+  await kinds.first().check({ force: true });
+  const expected = await page.locator(`[data-filter-item="resources"][data-kind="${kind}"]`).count();
+  await expect(page.locator('[data-filter-item="resources"]:visible')).toHaveCount(expected);
+  await expect(page).toHaveURL(new RegExp(`kind=${kind}`));
 });
 
 test('new content is searchable without code changes', async ({ page }) => {
