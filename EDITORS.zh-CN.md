@@ -75,7 +75,16 @@ Culture, Unfiltered 的所有内容（人、故事、主题、国家、资源）
 - **Themes**：标题、表情符号、一个问题（例如 “What makes somewhere feel like home?”）、简介、排序数字（越小越靠前）。
 - **Countries**：名字、国旗表情、地图坐标（纬度、经度，可以在网上搜 “国家名 latitude longitude”）、排序。ISO 数字可选，填了地图上这个国家会高亮。
 
-## 8. 谁改了什么
+## 8. 网站设置（Site settings）
+
+后台左侧最下面的 **Site settings** 里有全站设置：
+
+- **Show the placeholder notice**：每页最上面那条“占位内容”提示。等真实的人物和故事替换掉示例内容后，把它关掉。
+- **Notice text**：提示的文字，最多 140 个字符。
+
+保存后和其他修改一样，几分钟后网站更新。
+
+## 9. 谁改了什么
 
 每次保存都会以**你自己的 GitHub 账号**提交，所以修改记录一目了然：
 
@@ -85,13 +94,13 @@ Culture, Unfiltered 的所有内容（人、故事、主题、国家、资源）
 
 改错了？再编辑一次保存即可。需要整体撤回时，请负责人在 GitHub 上恢复那次提交。
 
-## 9. 常见问题
+## 10. 常见问题
 
 - **“Your GitHub user account does not have access to this repo.”**：你还不是协作者，或者还没接受邀请。
 - **保存后网站没变**：等 5 分钟再刷新。还没变，请负责人查看 GitHub 的 Actions 页面，可能是内容检查没通过。
 - **图片太大**：尽量把照片缩到宽 2000 像素以内再上传。
 
-## 10. 在自己电脑上试用（给懂技术的人）
+## 11. 在自己电脑上试用（给懂技术的人）
 
 ```bash
 npm install

@@ -75,7 +75,16 @@ You can upload a PDF and link related stories. Put the steps under “Instructio
 - **Themes**: title, emoji, one question (for example “What makes somewhere feel like home?”), description and an order number (lower comes first).
 - **Countries**: name, flag emoji, map position (latitude and longitude; search “country latitude longitude”) and order. The ISO number is optional and highlights the country outline on the map.
 
-## 8. Who changed what
+## 8. Site settings
+
+**Site settings**, at the bottom of the CMS sidebar, holds site-wide options:
+
+- **Show the placeholder notice**: the thin notice at the top of every page. Turn it off once real people and stories have replaced the sample content.
+- **Notice text**: the wording of that notice, up to 140 characters.
+
+Saving works like any other change: the site updates within a few minutes.
+
+## 9. Who changed what
 
 Every save is committed under **your own GitHub account**, so the record is clear:
 
@@ -85,13 +94,13 @@ Every save is committed under **your own GitHub account**, so the record is clea
 
 Made a mistake? Edit again and save. To undo a whole change, ask the project lead to revert that commit on GitHub.
 
-## 9. Common problems
+## 10. Common problems
 
 - **“Your GitHub user account does not have access to this repo.”** You are not a collaborator yet, or you have not accepted the invitation.
 - **The site did not change after saving.** Wait 5 minutes and refresh. If it still has not changed, ask the project lead to check the Actions page on GitHub; a content check may have failed.
 - **Images are too large.** Resize photos to at most 2000 pixels wide before uploading.
 
-## 10. Trying it on your own computer (for technical people)
+## 11. Trying it on your own computer (for technical people)
 
 ```bash
 npm install

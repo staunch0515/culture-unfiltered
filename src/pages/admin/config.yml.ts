@@ -1,6 +1,6 @@
 /**
  * Decap CMS configuration, generated at build time (JSON is valid YAML).
- * Fields mirror the zod schemas in src/content.config.ts; choice lists for
+ * Fields mirror the zod schemas in src/content.config.ts (and src/lib/settings.ts); choice lists for
  * countries, people, themes and stories are relation widgets that read the
  * content files, so nothing here lists actual content.
  */
@@ -163,6 +163,25 @@ export const GET: APIRoute = ({ site: siteUrl }) => {
           { label: 'Longitude', name: 'lng', widget: 'number', value_type: 'float', min: -180, max: 180, ...req },
           { label: 'ISO number', name: 'iso', widget: 'string', pattern: ['^\\d{3}$', 'Three digits, e.g. 404'], hint: 'Optional. Highlights the country outline on the map (ISO 3166-1 numeric).', ...opt },
           { label: 'Order', name: 'order', widget: 'number', value_type: 'int', default: 100, ...opt },
+        ],
+      },
+      {
+        name: 'settings', label: 'Site settings', editor: { preview: false },
+        files: [
+          {
+            name: 'site', label: 'Site settings', file: 'src/data/settings.json', format: 'json',
+            fields: [
+              {
+                label: 'Show the placeholder notice', name: 'showSampleNotice', widget: 'boolean', default: true,
+                hint: 'The thin notice at the top of every page. Turn it off once real people and stories have replaced the sample content.',
+                ...opt,
+              },
+              {
+                label: 'Notice text', name: 'sampleNoticeText', widget: 'string', default: 'Preview: all people and stories are placeholders',
+                hint: 'Up to 140 characters.', pattern: ['^.{0,140}$', 'Keep it under 140 characters'], ...opt,
+              },
+            ],
+          },
         ],
       },
     ],

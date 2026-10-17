@@ -43,6 +43,7 @@ OAuth client secret); it has no database.
 
 - Editor guides: [EDITORS.md](EDITORS.md) (English) · [EDITORS.zh-CN.md](EDITORS.zh-CN.md) (中文)
 - CMS fields: `src/pages/admin/config.yml.ts` (mirrors the schema; choice lists read content files)
+- Site settings (placeholder notice on/off and its text): `src/data/settings.json`, edited under "Site settings" in the CMS, validated in `src/lib/settings.ts`
 - Server setup and deployment: [DEPLOY.md](DEPLOY.md)
 
 ## Tests

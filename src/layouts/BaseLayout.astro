@@ -5,6 +5,7 @@ import bodyLatin from '@fontsource/atkinson-hyperlegible/files/atkinson-hyperleg
 import SiteHeader from '@/components/SiteHeader.astro';
 import SiteFooter from '@/components/SiteFooter.astro';
 import { site } from '@/lib/site';
+import { settings } from '@/lib/settings';
 
 export type SearchType = 'Story' | 'Person' | 'Theme' | 'Resource' | 'Page';
 
@@ -53,8 +54,8 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
-    {site.showSampleNotice && (
-      <p class="sample-notice label"><span class="sample-notice__bar" aria-hidden="true"></span>Preview: all people and stories are placeholders</p>
+    {settings.showSampleNotice && (
+      <p class="sample-notice label"><span class="sample-notice__bar" aria-hidden="true"></span>{settings.sampleNoticeText}</p>
     )}
     <SiteHeader />
     <main id="main" tabindex="-1" data-pagefind-body={searchType ? '' : undefined}>
