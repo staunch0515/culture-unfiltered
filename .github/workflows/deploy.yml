@@ -94,7 +94,7 @@ jobs:
     # Runs after a successful build, or on its own when an existing image_tag is given (rollback).
     if: ${{ !cancelled() && (needs.build.result == 'success' || (inputs.image_tag != '' && needs.build.result == 'skipped')) }}
     runs-on: ubuntu-latest
-	environment:
+    environment:
       name: production
       url: https://cultureunfiltered.org
     permissions:
