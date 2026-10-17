@@ -1,6 +1,6 @@
 ---
 name: Priya
-country: sweden
+country: india
 location: Karnataka
 photo: ../../assets/people/priya.svg
 photoAlt: Illustrated placeholder avatar with blue and bright cyan shapes.
