@@ -37,13 +37,19 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
-    <meta name="theme-color" content="#f2f1ec" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#131412" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#f2f1ec" data-dynamic />
     <meta name="color-scheme" content="light dark" />
     {searchType && <meta data-pagefind-filter="type[content]" content={searchType} />}
     {searchType && <meta data-pagefind-meta="type[content]" content={searchType} />}
     {searchType && searchImage && <meta data-pagefind-meta="image[content]" content={searchImage} />}
-    <script is:inline>document.documentElement.classList.add('js');</script>
+    <script is:inline>
+      document.documentElement.classList.add('js');
+      // Apply the visitor's saved colour scheme before first paint (no flash).
+      try {
+        var t = localStorage.getItem('cu-theme');
+        if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
+      } catch (e) {}
+    </script>
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
@@ -57,7 +63,9 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <SiteFooter />
     <script>
       import { initReveal } from '@/scripts/reveal';
+      import { initThemeControls } from '@/scripts/theme';
       initReveal();
+      initThemeControls();
     </script>
   </body>
 </html>

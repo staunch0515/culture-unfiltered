@@ -7,7 +7,7 @@ test('the map draws a local base map and one marker per country with participant
   page.on('request', (r) => {
     if (!r.url().startsWith('http://localhost')) external.push(r.url());
   });
-  const svg = page.waitForResponse((r) => r.url().endsWith('/world-map.svg'));
+  const svg = page.waitForResponse((r) => r.url().endsWith('/world-map-light.svg'));
   await page.goto('/map/');
   const res = await svg;
   expect(res.status()).toBe(200);

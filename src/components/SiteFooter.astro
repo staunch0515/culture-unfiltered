@@ -9,6 +9,11 @@ const links = [...site.nav.filter((n) => n.path !== '/'), { label: 'Map', path: 
     <div class="site-footer__about">
       <a class="site-footer__brand" href={href('/')}><Wordmark /></a>
       <p>{site.tagline}</p>
+      <div class="theme-switch" role="group" aria-label="Colour scheme">
+        <button type="button" data-theme-choice="auto" aria-pressed="true">Auto</button>
+        <button type="button" data-theme-choice="light" aria-pressed="false">Light</button>
+        <button type="button" data-theme-choice="dark" aria-pressed="false">Dark</button>
+      </div>
       <p class="site-footer__privacy">Made by young people. Participants appear by first name only; we never publish schools or addresses. No tracking, no third-party fonts.</p>
     </div>
     <nav aria-label="Footer">
@@ -25,6 +30,17 @@ const links = [...site.nav.filter((n) => n.path !== '/'), { label: 'Map', path: 
   .site-footer__about { display: grid; gap: 10px; align-content: start; }
   .site-footer__brand { text-decoration: none; color: var(--ink); display: inline-flex; min-height: var(--tap); align-items: center; }
   .site-footer__privacy { color: var(--muted); font-size: 16px; max-width: 44ch; }
+  /* Segmented control. Hidden without JS, where the system scheme always applies. */
+  .theme-switch { display: none; width: max-content; border: 1.5px solid var(--ink); margin-block: 6px; }
+  :global(.js) .theme-switch { display: inline-flex; }
+  .theme-switch button {
+    min-height: var(--tap); padding: 0 16px; border: 0; background: transparent; color: var(--ink); cursor: pointer;
+    font: 500 13px/1 var(--mono); letter-spacing: 0.08em; text-transform: uppercase;
+    transition: background-color var(--motion) ease-out, color var(--motion) ease-out;
+  }
+  .theme-switch button + button { border-left: 1.5px solid var(--ink); }
+  .theme-switch button:hover { text-decoration: underline; }
+  .theme-switch button[aria-pressed='true'] { background: var(--ink); color: var(--paper); }
   .site-footer__links { list-style: none; padding: 0; margin: 0; display: grid; }
   .site-footer__links a { display: inline-flex; align-items: center; min-height: var(--tap); min-width: var(--tap); }
 </style>

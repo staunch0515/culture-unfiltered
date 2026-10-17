@@ -21,6 +21,10 @@ const isCurrent = (path: string) => {
         ))}
       </ul>
     </nav>
+    <button class="icon-btn theme-toggle" type="button" data-theme-toggle aria-label="Switch colour scheme">
+      <svg class="theme-toggle__moon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z" stroke-linejoin="round" /></svg>
+      <svg class="theme-toggle__sun" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="4.2" /><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8" stroke-linecap="square" /></svg>
+    </button>
     <a class="icon-btn search-link" href={href('/search/')} aria-current={isCurrent('/search/') ? 'page' : undefined}>
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" /><path d="m20 20-4.8-4.8" stroke-linecap="square" /></svg>
       <span class="visually-hidden">Search</span>
@@ -89,6 +93,15 @@ const isCurrent = (path: string) => {
     background: none; border: 0; color: var(--ink); cursor: pointer;
   }
   .search-link[aria-current='page'] { box-shadow: inset 0 -3px 0 var(--mark); }
+
+  /* Theme toggle: shows the scheme you would switch to. Hidden without JS. */
+  .theme-toggle { display: none; }
+  :global(.js) .theme-toggle { display: inline-flex; }
+  .theme-toggle svg { transition: transform 400ms ease-out, opacity var(--motion) ease-out; }
+  .theme-toggle__sun { display: none; }
+  .theme-toggle[data-scheme='dark'] .theme-toggle__sun { display: block; }
+  .theme-toggle[data-scheme='dark'] .theme-toggle__moon { display: none; }
+  .theme-toggle:hover svg { transform: rotate(-20deg); }
 
   .menu-toggle { display: none; }
   .menu-toggle__icon { position: relative; width: 24px; height: 16px; }

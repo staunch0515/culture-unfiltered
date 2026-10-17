@@ -224,7 +224,8 @@ ul, ol, dl, dd, figure, blockquote { margin: 0; }
   padding-block: clamp(48px, 7vw, 96px);
   --focus: #8fb0ff;
 }
-@media (prefers-color-scheme: dark) { .inverted { --focus: #1b4dd8; } }
+@media (prefers-color-scheme: dark) { :root:not([data-theme='light']) .inverted { --focus: #1b4dd8; } }
+:root[data-theme='dark'] .inverted { --focus: #1b4dd8; }
 .inverted .label { color: var(--inv-muted); }
 .inverted h2 { font-size: clamp(40px, 6vw, 76px); }
 .inverted .btn { border-color: var(--inv-ink); color: var(--inv-ink); }
@@ -311,6 +312,9 @@ details.disclosure[open] > summary { margin-bottom: 8px; }
    Motion. Everything here is skipped when the visitor asks for less motion.
    ====================================================================== */
 @media (prefers-reduced-motion: no-preference) {
+  /* Switching colour scheme fades instead of flashing. */
+  body { transition: background-color 300ms ease-out, color 300ms ease-out; }
+
   .enter { animation: rise var(--motion) ease-out both; }
   @keyframes rise {
     from { opacity: 0.001; transform: translateY(6px); }
