@@ -18,7 +18,7 @@ test.describe('adding content is just adding files', () => {
     await expect(page.getByRole('heading', { level: 2, name: 'Inês' })).toBeVisible();
     await expect(page.getByText('Draftina')).toHaveCount(0);
 
-    const portugal = page.getByRole('radio', { name: /Portugal/ });
+    const portugal = page.getByRole('checkbox', { name: /Portugal/ });
     await expect(portugal).toHaveCount(1);
     await portugal.check({ force: true });
     await expect(page).toHaveURL(/country=portugal/);
@@ -49,19 +49,19 @@ test.describe('adding content is just adding files', () => {
     await page.goto(`${F}/themes/`);
     await expect(page.getByRole('link', { name: 'Music' })).toBeVisible();
     await page.goto(`${F}/themes/music/`);
-    const columns = page.locator('.compare__col h3');
+    const columns = page.locator('.compare__country');
     await expect(columns).toHaveText([/Portugal/]);
     await expect(page.getByText('Fixture perspective from Inês about music.')).toBeVisible();
   });
 
   test('stories filters pick up the new country and theme', async ({ page }) => {
     await page.goto(`${F}/stories/`);
-    await expect(page.locator('select[name="country"] option[value="portugal"]')).toHaveCount(1);
-    await expect(page.locator('select[name="theme"] option[value="music"]')).toHaveCount(1);
-    await page.selectOption('select[name="country"]', 'portugal');
+    await expect(page.locator('input[name="country"][value="portugal"]')).toHaveCount(1);
+    await expect(page.locator('input[name="theme"][value="music"]')).toHaveCount(1);
+    await page.locator('input[name="country"][value="portugal"]').check({ force: true });
     // Both fixture stories are by the Portugal fixture participant.
     await expect(page.locator('[data-filter-item="stories"]:visible')).toHaveCount(2);
-    await page.getByRole('button', { name: 'Clear filters' }).click();
+    await page.getByRole('button', { name: 'Clear all filters' }).click();
     await expect(page).not.toHaveURL(/country=/);
   });
 
@@ -77,7 +77,7 @@ test.describe('adding content is just adding files', () => {
     expect(real).not.toContain('/themes/music/');
     await page.goto('/people/');
     await expect(page.getByText('Inês')).toHaveCount(0);
-    await expect(page.getByRole('radio', { name: /Portugal/ })).toHaveCount(0);
+    await expect(page.getByRole('checkbox', { name: /Portugal/ })).toHaveCount(0);
   });
 });
 

@@ -3,9 +3,9 @@ import { render } from 'astro:content';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import StoryCard from '@/components/StoryCard.astro';
 import SectionHead from '@/components/SectionHead.astro';
+import Crumbs from '@/components/Crumbs.astro';
 import { loadSite, type Resource } from '@/lib/content';
 import { resourceKindLabels } from '@/lib/constants';
-import { href } from '@/lib/url';
 
 export async function getStaticPaths() {
   const s = await loadSite();
@@ -17,33 +17,31 @@ const { Content } = await render(resource.entry);
 const d = resource.data;
 ---
 <BaseLayout title={d.title} description={d.description} searchType="Resource">
-  <article class="wrap">
-    <header class="page-head resource-head">
-      <p class="eyebrow resource-head__kind">{resourceKindLabels[d.kind]}</p>
-      <h1>{d.title}</h1>
-      <p class="lede">{d.description}</p>
-      <dl class="meta" data-pagefind-ignore>
-        <div><dt>Ages</dt><dd>{d.ageGroup}</dd></div>
-        <div><dt>Time</dt><dd>{d.duration}</dd></div>
-      </dl>
-      {d.pdf && <p><a class="button" href={d.pdf} download>Download PDF <span class="arrow" aria-hidden="true">↓</span></a></p>}
-    </header>
-    <div class="editorial resource-body"><Content /></div>
+  <article>
+    <div class="wrap">
+      <header class="page-head resource-head">
+        <Crumbs trail={[{ label: 'Resources', path: '/resources/' }]} />
+        <p class="label">{resourceKindLabels[d.kind]}</p>
+        <h1>{d.title}</h1>
+        <p class="intro">{d.description}</p>
+        <dl class="facts" data-pagefind-ignore>
+          <dt class="label">Ages</dt><dd>{d.ageGroup}</dd>
+          <dt class="label">Time</dt><dd>{d.duration}</dd>
+        </dl>
+        {d.pdf && <p><a class="btn btn-primary" href={d.pdf} download>Download PDF <span class="arrow" aria-hidden="true">↓</span></a></p>}
+      </header>
+      <div class="prose resource-body"><Content /></div>
+    </div>
     {resource.stories.length > 0 && (
-      <section class="section" aria-labelledby="related-heading" data-pagefind-ignore>
-        <SectionHead index={1} id="related-heading" title="Related stories" />
-        <ul class="grid reveal-stagger">{resource.stories.map((story) => <li class="reveal"><StoryCard story={story} /></li>)}</ul>
+      <section class="section wrap" aria-labelledby="related-heading" data-pagefind-ignore>
+        <SectionHead id="related-heading" title="Related stories" />
+        <ul class="grid-3 reveal-stagger">{resource.stories.map((story) => <li class="reveal"><StoryCard story={story} /></li>)}</ul>
       </section>
     )}
-    <p><a class="text-link" href={href('/resources/')}><span aria-hidden="true">←</span> All resources</a></p>
   </article>
 </BaseLayout>
 
 <style>
-  .resource-head h1 { font-size: var(--step-5); }
-  .resource-head__kind { color: var(--accent); }
-  .meta { display: flex; gap: var(--space-6); margin: var(--space-4) 0; }
-  .meta dt { font-size: var(--step--2); font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
-  .meta dd { margin: 0; font-family: var(--font-display); font-weight: 800; font-stretch: 118%; font-size: var(--step-2); }
-  .resource-body { margin-bottom: var(--space-5); }
+  .resource-head h1 { font-size: clamp(44px, 7vw, 100px); }
+  .resource-body { padding-bottom: 24px; }
 </style>

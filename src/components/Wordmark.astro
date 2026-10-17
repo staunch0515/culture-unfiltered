@@ -1,0 +1,11 @@
+---
+/** The site name as a wordmark: display serif, the part after the comma in italic. */
+import { site } from '@/lib/site';
+const [first, ...rest] = site.name.split(',');
+const second = rest.join(',').trim();
+---
+<span class="wordmark">{second ? <>{first},{' '}<em>{second}</em></> : site.name}</span>
+<style>
+  .wordmark { font: 400 28px/1 var(--display); white-space: nowrap; letter-spacing: -0.005em; }
+  .wordmark em { font-style: italic; }
+</style>

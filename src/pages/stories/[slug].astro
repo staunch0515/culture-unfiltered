@@ -1,13 +1,14 @@
 ---
-import { Image, getImage } from 'astro:assets';
 import { render } from 'astro:content';
+import { getImage } from 'astro:assets';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import VideoEmbed from '@/components/VideoEmbed.astro';
+import Frame from '@/components/Frame.astro';
 import CountryLabel from '@/components/CountryLabel.astro';
-import ResourceCard from '@/components/ResourceCard.astro';
+import ResourceList from '@/components/ResourceList.astro';
 import StoryCard from '@/components/StoryCard.astro';
-import MediaIcon from '@/components/MediaIcon.astro';
 import SectionHead from '@/components/SectionHead.astro';
+import Crumbs from '@/components/Crumbs.astro';
 import { loadSite, type Story } from '@/lib/content';
 import { mediaLabels } from '@/lib/constants';
 import { href, formatDate, listJoin } from '@/lib/url';
@@ -26,194 +27,145 @@ const related = s.relatedTo(story.id);
 const thumb = await getImage({ src: d.thumbnail, width: 240 });
 const words = (story.entry.body ?? '').split(/\s+/).filter(Boolean).length;
 const minutes = Math.max(1, Math.round(words / 200));
-let n = 0;
-const next = () => ++n;
 ---
 <BaseLayout title={d.title} description={d.description} searchType="Story" searchImage={thumb.src}>
-  <article class="story">
+  <article>
     <header class="wrap story-head">
-      <p class="eyebrow story-head__meta">
-        <span class="story-head__type"><MediaIcon type={d.mediaType} size={14} /> {mediaLabels[d.mediaType]}</span>
-        <span aria-hidden="true">·</span>
-        <time datetime={d.date.toISOString()}>{formatDate(d.date)}</time>
-        <span aria-hidden="true">·</span>
-        <span>{minutes} min read</span>
-      </p>
+      <Crumbs trail={[{ label: 'Stories', path: '/stories/' }]} />
       <h1 class="story-head__title">{d.title}</h1>
-      <p class="story-head__dek">{d.description}</p>
-      <div class="byline">
-        <ul class="byline__faces" aria-hidden="true">
-          {story.contributors.map((p) => <li><Image src={p.data.photo} alt="" width={96} height={96} loading="eager" /></li>)}
-        </ul>
-        <p class="byline__names">
-          By {story.contributors.map((p, i) => (
-            <>{i > 0 && (i === story.contributors.length - 1 ? ' and ' : ', ')}<a href={href(`/people/${p.id}/`)}>{p.data.name}</a></>
-          ))}
-          <span class="byline__places">{story.countries.map((c) => c.data.name).join(' · ')}</span>
-        </p>
-      </div>
+      <p class="story-head__summary">{d.description}</p>
+      <p class="story-head__meta">
+        <span class="label">{mediaLabels[d.mediaType]}</span>
+        <span class="label"><time datetime={d.date.toISOString()}>{formatDate(d.date)}</time></span>
+        <span class="label">{minutes} min read</span>
+        <span class="story-head__by">By {story.contributors.map((p, i) => (
+          <>{i > 0 && (i === story.contributors.length - 1 ? ' and ' : ', ')}<a class="person-link" href={href(`/people/${p.id}/`)}>{p.data.name}</a></>
+        ))}</span>
+      </p>
     </header>
 
-    <div class="wrap story-media">
-      {d.video ? (
-        <VideoEmbed provider={d.video.provider} id={d.video.id} captions={d.video.captions} title={d.title} poster={d.thumbnail} eager />
-      ) : (
-        <figure class="story-media__hero">
-          <Image src={d.thumbnail} alt={d.thumbnailAlt} width={1600} loading="eager" fetchpriority="high" />
-        </figure>
-      )}
+    <div class="wrap grid-12 story-body">
+      <div class="story-body__media">
+        {d.video ? (
+          <VideoEmbed provider={d.video.provider} id={d.video.id} captions={d.video.captions} title={d.title} poster={d.thumbnail} eager />
+        ) : (
+          <Frame src={d.thumbnail} alt={d.thumbnailAlt} width={1240} sizes="(max-width: 1288px) 100vw, 1240px" eager />
+        )}
+      </div>
+
       {d.audio && (
-        <figure class="audio">
-          <figcaption class="eyebrow"><MediaIcon type="audio" size={14} /> Listen</figcaption>
+        <figure class="story-body__col audio">
+          <figcaption class="label">Listen</figcaption>
           <audio controls preload="none" src={d.audio.src}></audio>
           {d.audio.transcript && (
-            <details class="audio__transcript"><summary>Read the transcript</summary><p>{d.audio.transcript}</p></details>
+            <details class="disclosure"><summary>Read the transcript</summary><p>{d.audio.transcript}</p></details>
           )}
         </figure>
       )}
-    </div>
 
-    <div class="wrap story-layout">
-      <div class="editorial editorial--dropcap story-body"><Content /></div>
+      <div class="story-body__col prose"><Content /></div>
 
-      <aside class="story-aside" aria-labelledby="about-heading">
-        <h2 id="about-heading" class="story-aside__title">About this story</h2>
-        <dl class="about">
-          <div><dt>Made by</dt><dd>{story.contributors.map((p, i) => <>{i > 0 && ', '}<a href={href(`/people/${p.id}/`)}>{p.data.name}</a></>)}</dd></div>
-          <div><dt>From</dt><dd>{listJoin(story.countries.map((c) => c.data.name))}</dd></div>
-          <div><dt>Format</dt><dd>{mediaLabels[d.mediaType]}{d.video?.captions && ', with captions'}</dd></div>
-          <div><dt>Published</dt><dd>{formatDate(d.date)}</dd></div>
-          <div><dt>Themes</dt><dd><ul class="tags">{story.themes.map((t) => <li><a class="tag" href={href(`/themes/${t.id}/`)}><span aria-hidden="true">{t.data.emoji}</span>{t.data.title}</a></li>)}</ul></dd></div>
+      <section class="story-body__col" aria-labelledby="about-heading">
+        <h2 id="about-heading" class="story-body__h2">About this story</h2>
+        <dl class="facts">
+          <dt class="label">Made by</dt><dd>{story.contributors.map((p, i) => <>{i > 0 && ', '}<a class="person-link" href={href(`/people/${p.id}/`)}>{p.data.name}</a></>)}</dd>
+          <dt class="label">From</dt><dd>{listJoin(story.countries.map((c) => c.data.name))}</dd>
+          <dt class="label">Format</dt><dd>{mediaLabels[d.mediaType]}{d.video?.captions && ', with captions'}</dd>
+          <dt class="label">Published</dt><dd>{formatDate(d.date)}</dd>
+          <dt class="label">Themes</dt><dd><ul class="tags">{story.themes.map((t) => <li><a class="tag" href={href(`/themes/${t.id}/`)}><span aria-hidden="true">{t.data.emoji}</span>{t.data.title}</a></li>)}</ul></dd>
         </dl>
-      </aside>
-    </div>
-
-    {d.photos.length > 0 && (
-      <section class="wrap section" aria-labelledby="photos-heading">
-        <SectionHead index={next()} id="photos-heading" title="Photos" />
-        <ul class="photos reveal-stagger">
-          {d.photos.map((photo) => (
-            <li class="reveal">
-              <figure>
-                <Image src={photo.src} alt={photo.alt} width={1000} />
-                {photo.caption && <figcaption>{photo.caption}</figcaption>}
-              </figure>
-            </li>
-          ))}
-        </ul>
       </section>
-    )}
 
-    {story.perspectives.length > 0 && (
-      <section class="wrap section" aria-labelledby="perspectives-heading">
-        <SectionHead index={next()} id="perspectives-heading" title="Perspectives" />
-        <ul class="perspectives reveal-stagger">
-          {story.perspectives.map((p) => (
-            <li class="perspective reveal">
-              {p.text && <blockquote class="perspective__quote"><p>{p.text}</p></blockquote>}
-              {p.video && <VideoEmbed provider={p.video.provider} id={p.video.id} title={`${p.person.data.name}'s perspective`} compact />}
-              <div class="perspective__who">
-                <Image src={p.person.data.photo} alt="" width={96} height={96} class="perspective__avatar" />
-                <div>
-                  <h3 class="perspective__name"><a href={href(`/people/${p.person.id}/`)}>{p.person.data.name}</a></h3>
-                  <p class="perspective__place"><CountryLabel country={p.person.country} /></p>
+      {d.photos.length > 0 && (
+        <section class="story-body__wide" aria-labelledby="photos-heading">
+          <h2 id="photos-heading" class="story-body__h2">Photos</h2>
+          <ul class="photos reveal-stagger">
+            {d.photos.map((photo) => (
+              <li class="reveal">
+                <figure>
+                  <Frame src={photo.src} alt={photo.alt} width={800} sizes="(max-width: 859px) 100vw, 620px" />
+                  {photo.caption && <figcaption class="label">{photo.caption}</figcaption>}
+                </figure>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {story.perspectives.length > 0 && (
+        <section class="story-body__wide" aria-labelledby="perspectives-heading">
+          <h2 id="perspectives-heading" class="story-body__h2">Perspectives</h2>
+          <ul class="quote-grid reveal-stagger">
+            {story.perspectives.map((p) => (
+              <li class="quote-card reveal">
+                <div class="quote-card__who">
+                  <Frame src={p.person.data.photo} alt="" ratio="avatar" width={52} fallbackName={p.person.data.name} />
+                  <div>
+                    <p class="quote-card__name"><a href={href(`/people/${p.person.id}/`)}>{p.person.data.name}</a></p>
+                    <p class="label"><CountryLabel country={p.person.country} /></p>
+                  </div>
                 </div>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </section>
-    )}
+                {p.text && <p class="quote-card__text">{p.text}</p>}
+                {p.video && <VideoEmbed provider={p.video.provider} id={p.video.id} title={`${p.person.data.name}'s perspective`} compact />}
+                <a class="more-link" href={href(`/people/${p.person.id}/`)}>More from {p.person.data.name} <span class="arrow" aria-hidden="true">→</span></a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+    </div>
 
     {d.reflection && (
-      <section class="section on-night reflection-band" aria-labelledby="reflection-heading">
+      <section class="inverted reflection" aria-labelledby="reflection-heading">
         <div class="wrap">
-          <SectionHead index={next()} id="reflection-heading" title="Reflection" />
-          <dl class="reflection reveal-stagger">
-            <div class="reveal"><dt><span aria-hidden="true">01</span>What surprised us?</dt><dd>{d.reflection.surprised}</dd></div>
-            <div class="reveal"><dt><span aria-hidden="true">02</span>What did we assume?</dt><dd>{d.reflection.assumed}</dd></div>
-            <div class="reveal"><dt><span aria-hidden="true">03</span>What did we learn?</dt><dd>{d.reflection.learned}</dd></div>
-          </dl>
+          <p class="label">Reflection</p>
+          <h2 id="reflection-heading">What we took away</h2>
+          <ul class="inverted-cols reveal-stagger">
+            <li class="reveal"><h3 class="accent-bar">What surprised us?</h3><p>{d.reflection.surprised}</p></li>
+            <li class="reveal"><h3 class="accent-bar">What did we assume?</h3><p>{d.reflection.assumed}</p></li>
+            <li class="reveal"><h3 class="accent-bar">What did we learn?</h3><p>{d.reflection.learned}</p></li>
+          </ul>
         </div>
       </section>
     )}
 
     {resources.length > 0 && (
-      <section class="wrap section" aria-labelledby="resources-heading" data-pagefind-ignore>
-        <SectionHead index={next()} id="resources-heading" title="Use this story in class" />
-        <ul class="grid reveal-stagger">{resources.map((r) => <li class="reveal"><ResourceCard resource={r} /></li>)}</ul>
+      <section class="section wrap" aria-labelledby="resources-heading" data-pagefind-ignore>
+        <SectionHead id="resources-heading" title="Use this story in class" />
+        <ResourceList resources={resources} headingLevel="h3" />
       </section>
     )}
 
     {related.length > 0 && (
-      <section class="wrap section" aria-labelledby="related-heading" data-pagefind-ignore>
-        <SectionHead index={next()} id="related-heading" title="Keep exploring" link={{ href: href('/stories/'), label: 'All stories' }} />
-        <ul class="grid reveal-stagger">{related.map((r) => <li class="reveal"><StoryCard story={r} /></li>)}</ul>
+      <section class="section wrap" aria-labelledby="related-heading" data-pagefind-ignore>
+        <SectionHead id="related-heading" title="Keep exploring" link={{ href: href('/stories/'), label: 'All stories' }} />
+        <ul class="grid-3 reveal-stagger">{related.map((r) => <li class="reveal"><StoryCard story={r} /></li>)}</ul>
       </section>
     )}
   </article>
 </BaseLayout>
 
 <style>
-  .story-head { padding-block: var(--space-6) var(--space-5); }
-  .story-head__meta { display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem 0.6rem; }
-  .story-head__type { display: inline-flex; align-items: center; gap: 0.35rem; color: var(--accent); }
-  .story-head__title { font-size: var(--step-6); line-height: 0.92; letter-spacing: -0.035em; max-width: 14ch; margin-bottom: var(--space-4); }
-  .story-head__dek { font-family: var(--font-serif); font-style: italic; font-size: var(--step-2); line-height: 1.35; color: var(--ink-soft); max-width: 40ch; margin-bottom: var(--space-5); }
+  .story-head { padding-block: clamp(32px, 5vw, 64px) 40px; display: grid; gap: 20px; }
+  .story-head__title { font-size: clamp(44px, 7vw, 100px); max-width: 16ch; }
+  .story-head__summary { font-size: 22px; max-width: 52ch; }
+  .story-head__meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 20px; }
+  .story-head__by { font-size: 17px; }
 
-  .byline { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); padding-top: var(--space-4); border-top: 1px solid var(--line); }
-  .byline__faces { display: flex; list-style: none; padding: 0; margin: 0; }
-  .byline__faces li { margin-left: -0.6rem; }
-  .byline__faces li:first-child { margin-left: 0; }
-  .byline__faces img { width: 2.75rem; height: 2.75rem; border-radius: 50%; border: 2px solid var(--paper); background: var(--paper-2); }
-  .byline__names { margin: 0; font-weight: 700; }
-  .byline__names a { color: var(--ink); }
-  .byline__places { display: block; font-weight: 500; color: var(--muted); font-size: var(--step--1); }
+  .story-body { gap: 56px 24px; }
+  .story-body > .story-body__col { grid-column: 3 / 11; }
+  .story-body > .story-body__media, .story-body > .story-body__wide { grid-column: 1 / -1; }
+  @media (max-width: 859px) { .story-body > .story-body__col { grid-column: 1 / -1; } }
+  .story-body__h2 { font-size: clamp(34px, 5vw, 56px); margin-bottom: 24px; }
+  .prose { font-size: 19px; }
 
-  .story-media { margin-bottom: var(--space-6); }
-  .story-media__hero { margin: 0; }
-  .story-media__hero img { width: 100%; border-radius: var(--radius-lg); }
-  .audio { margin: var(--space-4) 0 0; padding: var(--space-4); background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
-  .audio figcaption { display: flex; align-items: center; gap: 0.4rem; color: var(--accent); }
+  .audio { display: grid; gap: 10px; }
   .audio audio { width: 100%; }
-  .audio__transcript { margin-top: var(--space-3); }
-  .audio__transcript summary { cursor: pointer; font-weight: 700; min-height: 44px; display: flex; align-items: center; }
 
-  .story-layout { display: grid; gap: var(--space-6); }
-  .story-aside { align-self: start; border-top: 2px solid var(--ink); padding-top: var(--space-3); }
-  .story-aside__title { font-size: var(--step-1); margin-bottom: var(--space-3); }
-  .about { display: grid; gap: var(--space-3); margin: 0; }
-  .about dt { font-size: var(--step--2); font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.15rem; }
-  .about dd { margin: 0; font-weight: 600; }
-  @media (min-width: 60rem) {
-    .story-layout { grid-template-columns: minmax(0, 1fr) 18rem; gap: var(--space-7); }
-    .story-aside { position: sticky; top: calc(var(--header-h) + var(--space-4)); }
-  }
+  .photos { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+  .photos li:first-child { grid-column: 1 / -1; }
+  .photos figure { display: grid; gap: 8px; }
+  @media (max-width: 639px) { .photos { grid-template-columns: minmax(0, 1fr); } }
 
-  .photos { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); }
-  @media (min-width: 52rem) {
-    .photos { grid-template-columns: repeat(2, 1fr); }
-    .photos li:first-child { grid-column: 1 / -1; }
-  }
-  .photos figure { margin: 0; }
-  .photos img { width: 100%; border-radius: var(--radius); }
-  .photos figcaption { margin-top: var(--space-2); font-size: var(--step--1); color: var(--muted); }
-
-  .perspectives { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr)); }
-  .perspective { display: flex; flex-direction: column; gap: var(--space-4); padding: var(--space-4); background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); }
-  .perspective__quote { position: relative; margin: 0; font-family: var(--font-serif); font-size: var(--step-1); line-height: 1.45; }
-  .perspective__quote::before { content: '“'; display: block; font-family: var(--font-display); font-weight: 800; font-size: 3.5rem; line-height: 0.6; color: var(--accent); margin-bottom: var(--space-2); }
-  .perspective__quote p { margin: 0; }
-  .perspective__who { display: flex; align-items: center; gap: var(--space-3); margin-top: auto; padding-top: var(--space-3); border-top: 1px solid var(--line); }
-  .perspective__avatar { width: 3rem; height: 3rem; border-radius: 50%; background: var(--paper-2); }
-  .perspective__name { font-size: var(--step-0); margin: 0; letter-spacing: 0; }
-  .perspective__name a { color: var(--ink); }
-  .perspective__place { margin: 0; font-size: var(--step--1); color: var(--muted); }
-
-  .reflection-band { margin-block: var(--space-5); }
-  .reflection { display: grid; gap: var(--space-5); margin: 0; grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); }
-  .reflection > div { border-top: 1px solid #3a3a3a; padding-top: var(--space-4); }
-  .reflection dt { font-family: var(--font-display); font-weight: 800; font-stretch: 118%; font-size: var(--step-3); line-height: 1.05; letter-spacing: -0.02em; margin-bottom: var(--space-3); }
-  .reflection dt span { display: block; font-size: var(--step--1); color: var(--night-accent); letter-spacing: 0; margin-bottom: var(--space-2); }
-  .reflection dd { margin: 0; font-family: var(--font-serif); font-size: var(--step-1); line-height: 1.5; color: var(--night-text); }
+  .reflection { margin-top: clamp(48px, 8vw, 104px); }
 </style>

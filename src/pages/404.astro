@@ -3,18 +3,19 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
 import { href } from '@/lib/url';
 ---
 <BaseLayout title="Page not found">
-  <div class="wrap not-found">
-    <p class="not-found__code" aria-hidden="true">404</p>
-    <h1>This page wandered off</h1>
-    <p class="lede">We could not find what you were looking for. It may have moved, or it may never have existed.</p>
-    <p class="actions">
-      <a class="button" href={href('/')}>Back to the start <span class="arrow" aria-hidden="true">→</span></a>
-      <a class="button button--ghost" href={href('/stories/')}>Browse stories</a>
-    </p>
+  <div class="wrap">
+    <header class="page-head not-found">
+      <p class="label">Error 404</p>
+      <h1>This page wandered <em>off</em></h1>
+      <p class="intro">We could not find what you were looking for. It may have moved, or it may never have existed.</p>
+      <p class="actions">
+        <a class="btn btn-primary" href={href('/')}>Back to the start <span class="arrow" aria-hidden="true">→</span></a>
+        <a class="btn" href={href('/stories/')}>Browse stories</a>
+      </p>
+    </header>
   </div>
 </BaseLayout>
 <style>
-  .not-found { padding-block: var(--space-7); }
-  .not-found__code { font-family: var(--font-display); font-weight: 800; font-stretch: 125%; font-size: clamp(6rem, 3rem + 14vw, 16rem); line-height: 0.85; letter-spacing: -0.05em; color: var(--accent); margin: 0 0 var(--space-4); }
-  .actions { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+  .not-found h1 em { font-style: italic; }
+  .actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; }
 </style>

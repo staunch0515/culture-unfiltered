@@ -1,154 +1,153 @@
 ---
-import { Image } from 'astro:assets';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import StoryCard from '@/components/StoryCard.astro';
 import ThemeList from '@/components/ThemeList.astro';
 import PersonCard from '@/components/PersonCard.astro';
 import WorldMap from '@/components/WorldMap.astro';
 import SectionHead from '@/components/SectionHead.astro';
+import Frame from '@/components/Frame.astro';
 import { loadSite } from '@/lib/content';
 import { principles } from '@/lib/method';
+import { site } from '@/lib/site';
 import { href } from '@/lib/url';
 
 const s = await loadSite();
-const [featured, ...rest] = s.stories;
 const mapData = s.activeCountries.map((country) => ({ country, count: s.peopleIn(country.id).length }));
 const themeData = s.themes.map((theme) => ({ theme, count: s.storiesAbout(theme.id).length }));
-const stats = [
-  { value: s.people.length, label: 'young people' },
-  { value: s.activeCountries.length, label: s.activeCountries.length === 1 ? 'country' : 'countries' },
-  { value: s.stories.length, label: 'stories' },
-  { value: s.themes.length, label: 'shared questions' },
-];
+const [nameFirst, ...nameRest] = site.name.split(',');
+const nameSecond = nameRest.join(',').trim();
+
+// The "big question": the first theme's question, answered by its description.
+const lead = s.themes[0];
+const answer = lead?.data.description ?? '';
+const firstSentence = answer.match(/^.*?[.!?](\s|$)/)?.[0]?.trim() ?? answer;
+const restOfAnswer = answer.slice(firstSentence.length).trim();
+const leadVoices = lead ? s.contributionsByCountry(lead.id).length : 0;
 ---
 <BaseLayout>
-  <section class="hero" aria-labelledby="hero-title">
-    <div class="wrap">
-      <p class="eyebrow hero__eyebrow">A digital anthropology exhibition · made by teenagers</p>
-      <h1 id="hero-title" class="hero__title">Culture,<br /><span>Unfiltered.</span></h1>
-      <div class="hero__row">
-        <div class="hero__intro">
-          <p class="lede hero__lede">
-            {s.people.length} young people in {s.activeCountries.length} countries, telling their own stories about everyday life.
-            Not countries. Not stereotypes. Just people.
-          </p>
-          <div class="hero__actions">
-            <a class="button" href={href('/stories/')}>Explore the stories <span class="arrow" aria-hidden="true">→</span></a>
-            <a class="button button--ghost" href={href('/people/')}>Meet the people</a>
-          </div>
-        </div>
-        <ul class="hero__faces" aria-label="The participants">
-          {s.people.map((p) => (
-            <li>
-              <a href={href(`/people/${p.id}/`)} class="face">
-                <Image src={p.data.photo} alt="" width={200} height={200} loading="eager" />
-                <span class="face__name">{p.data.name}</span>
-              </a>
-            </li>
-          ))}
+  <section class="hero wrap" aria-labelledby="hero-title">
+    <div class="grid-12 hero__grid">
+      <div class="hero__text">
+        <p class="label enter">A digital anthropology exhibition · made by teenagers</p>
+        <h1 id="hero-title" class="hero__title">{nameSecond ? <>{nameFirst},<span>{nameSecond}</span></> : site.name}</h1>
+        <p class="lede hero__subtitle enter">
+          {s.people.length} young people in {s.activeCountries.length} countries, telling their own stories about everyday life.
+          Not countries. Not stereotypes. Just people.
+        </p>
+        <ul class="hero__links enter">
+          <li><a href={href('/themes/')}>Themes</a></li>
+          <li><a href={href('/map/')}>Map</a></li>
+          <li><a href={href('/method/')}>Our method</a></li>
+          <li><a href={href('/resources/')}>For teachers</a></li>
         </ul>
+        <div class="hero__actions enter">
+          <a class="btn btn-primary" href={href('/stories/')}>Explore the stories <span class="arrow" aria-hidden="true">→</span></a>
+          <a class="btn" href={href('/people/')}>Meet the people</a>
+        </div>
       </div>
-      <dl class="stats">
-        {stats.map((st) => (
-          <div class="stats__item"><dt class="stats__label">{st.label}</dt><dd class="stats__value">{st.value}</dd></div>
+      <ul class="hero__collage enter" aria-label="The participants">
+        {s.people.slice(0, 6).map((p) => (
+          <li>
+            <a class="collage-item" href={href(`/people/${p.id}/`)}>
+              <Frame src={p.data.photo} alt="" ratio="portrait" width={220} sizes="(max-width: 859px) 33vw, 200px" eager fallbackName={p.data.name} />
+              <span class="collage-item__name">{p.data.name}</span>
+              <span class="label">{p.country.data.name}</span>
+            </a>
+          </li>
         ))}
-      </dl>
+      </ul>
     </div>
   </section>
 
-  {featured && (
-    <section class="section wrap" aria-labelledby="featured-heading">
-      <SectionHead index={1} id="featured-heading" title="Featured story" link={{ href: href('/stories/'), label: 'All stories' }} />
-      <div class="reveal"><StoryCard story={featured} variant="feature" /></div>
+  {lead && (
+    <section class="section wrap" aria-labelledby="question-heading">
+      <div class="grid-12 question">
+        <p class="label question__label">Theme · {lead.data.title}</p>
+        <h2 id="question-heading" class="question__title reveal">{lead.data.question}</h2>
+        <p class="question__answer reveal"><span class="mark">{firstSentence}</span>{restOfAnswer && ` ${restOfAnswer}`}</p>
+        <div class="question__body reveal">
+          <p>Every theme starts with one question. {leadVoices > 0 ? `People in ${leadVoices} ${leadVoices === 1 ? 'country' : 'countries'} have answered this one, side by side.` : 'Answers are on their way.'}</p>
+          <a class="more-link" href={href(`/themes/${lead.id}/`)}>Read the answers <span class="arrow" aria-hidden="true">→</span></a>
+        </div>
+      </div>
     </section>
   )}
 
-  <section class="section wrap" aria-labelledby="themes-heading">
-    <SectionHead index={2} id="themes-heading" title="One question, many answers" link={{ href: href('/themes/'), label: 'All themes' }} />
-    <ThemeList themes={themeData} />
-  </section>
-
-  <section class="section wrap" aria-labelledby="people-heading">
-    <SectionHead index={3} id="people-heading" title="The people" link={{ href: href('/people/'), label: 'Meet everyone' }} />
-    <ul class="grid people-grid reveal-stagger">
-      {s.people.map((p) => <li class="reveal"><PersonCard person={p} showBio={false} /></li>)}
-    </ul>
-  </section>
-
-  <section class="section wrap" aria-labelledby="map-heading">
-    <SectionHead index={4} id="map-heading" title="Where we are" link={{ href: href('/map/'), label: 'Open the map' }} />
-    <div class="reveal"><WorldMap countries={mapData} headingId="map-heading" /></div>
-  </section>
-
-  {rest.length > 0 && (
-    <section class="section wrap" aria-labelledby="latest-heading">
-      <SectionHead index={5} id="latest-heading" title="More stories" link={{ href: href('/stories/'), label: 'All stories' }} />
-      <ul class="grid reveal-stagger">
-        {rest.slice(0, 3).map((story) => <li class="reveal"><StoryCard story={story} /></li>)}
+  {s.stories.length > 0 && (
+    <section class="section wrap" aria-labelledby="stories-heading">
+      <SectionHead id="stories-heading" title="Latest stories" link={{ href: href('/stories/'), label: 'All stories' }} />
+      <ul class="grid-3 reveal-stagger">
+        {s.stories.slice(0, 3).map((story) => <li class="reveal"><StoryCard story={story} /></li>)}
       </ul>
     </section>
   )}
 
-  <section class="section on-night method-band" aria-labelledby="method-heading">
+  <section class="section wrap" aria-labelledby="themes-heading">
+    <SectionHead id="themes-heading" title="One question, many answers" link={{ href: href('/themes/'), label: 'All themes' }} />
+    <ThemeList themes={themeData} />
+  </section>
+
+  <section class="section wrap" aria-labelledby="people-heading">
+    <SectionHead id="people-heading" title="The people" link={{ href: href('/people/'), label: 'All people' }} />
+    <ul class="grid-4 reveal-stagger">
+      {s.people.map((p) => <li class="reveal"><PersonCard person={p} /></li>)}
+    </ul>
+  </section>
+
+  <section class="section wrap" aria-labelledby="map-heading">
+    <SectionHead id="map-heading" title="Where we are" link={{ href: href('/map/'), label: 'Open the map' }} />
+    <div class="reveal"><WorldMap countries={mapData} headingId="map-heading" /></div>
+  </section>
+
+  <section class="inverted" aria-labelledby="method-heading">
     <div class="wrap">
-      <SectionHead index={6} id="method-heading" title="How we work" link={{ href: href('/method/'), label: 'Our method' }} />
-      <ol class="method-band__list reveal-stagger">
-        {principles.map((p, i) => (
+      <p class="label">How we work</p>
+      <h2 id="method-heading">Five principles</h2>
+      <ul class="inverted-cols reveal-stagger">
+        {principles.map((p) => (
           <li class="reveal">
-            <span class="method-band__n" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
-            <h3>{p.title}</h3>
-            <p class="muted">{p.text}</p>
+            <h3 class="accent-bar">{p.title}</h3>
+            <p>{p.text}</p>
           </li>
         ))}
-      </ol>
+      </ul>
+      <p class="method-link"><a class="btn" href={href('/method/')}>Our method <span class="arrow" aria-hidden="true">→</span></a></p>
     </div>
   </section>
 </BaseLayout>
 
 <style>
-  .hero { padding-block: var(--space-6) var(--space-5); }
-  .hero__eyebrow { margin-bottom: var(--space-4); }
-  .hero__title {
-    font-size: clamp(2.6rem, 0.9rem + 8.4vw, 9.5rem);
-    font-stretch: 122%;
-    line-height: 0.88;
-    letter-spacing: -0.035em;
-    margin-bottom: var(--space-5);
-  }
-  .hero__title span { color: var(--accent); }
-  .hero__row { display: grid; gap: var(--space-5); align-items: center; }
-  .hero__lede { max-width: 30ch; }
-  .hero__actions { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+  .hero__grid { align-items: start; padding-block: clamp(40px, 6vw, 88px); }
+  .hero__text { grid-column: 1 / 7; display: grid; gap: 22px; align-content: start; }
+  .hero__collage { grid-column: 7 / 13; }
+  .hero__title { font-size: clamp(60px, 9.5vw, 140px); line-height: 0.9; letter-spacing: -0.01em; }
+  .hero__title span { display: block; font-style: italic; }
+  .hero__subtitle { font: italic 400 clamp(22px, 2.6vw, 30px)/1.3 var(--display); max-width: 30ch; }
+  .hero__links { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 0 18px; }
+  .hero__links a { display: inline-flex; align-items: center; justify-content: center; min-height: var(--tap); min-width: var(--tap); font: 500 13px/1 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; }
+  .hero__actions { display: flex; flex-wrap: wrap; gap: 12px; }
 
-  .hero__faces { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-3); max-width: 30rem; }
-  .face { display: block; text-decoration: none; color: var(--ink); text-align: center; }
-  .face img {
-    width: 100%; aspect-ratio: 1; border-radius: 50%; background: var(--paper-2);
-    transition: transform var(--dur-2) var(--ease-out);
-  }
-  .hero__faces li:nth-child(odd) .face img { transform: rotate(-4deg); }
-  .hero__faces li:nth-child(even) .face img { transform: rotate(4deg) translateY(10px); }
-  .hero__faces .face:hover img, .hero__faces .face:focus-visible img { transform: scale(1.06) rotate(0); }
-  .face__name { display: inline-block; margin-top: var(--space-2); font-weight: 700; font-size: var(--step--1); }
-  .face:hover .face__name { color: var(--accent); }
+  .hero__collage { list-style: none; margin: 0; padding: 0 0 28px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+  .hero__collage li:nth-child(3n + 2) { transform: translateY(28px); }
+  .collage-item { display: grid; gap: 6px; text-decoration: none; color: var(--ink); }
+  .collage-item :global(.frame > img) { transition: transform 600ms ease-out; }
+  .collage-item:hover :global(.frame > img) { transform: scale(1.05); }
+  .collage-item__name { font: 400 22px/1.1 var(--display); margin-top: 4px; }
+  .collage-item:hover .collage-item__name { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.15em; }
 
-  .stats { display: grid; grid-template-columns: repeat(2, 1fr); margin: var(--space-6) 0 0; border-top: 2px solid var(--ink); }
-  .stats__item { display: flex; flex-direction: column-reverse; padding: var(--space-3) var(--space-3) 0 0; }
-  .stats__value { margin: 0; font-family: var(--font-display); font-weight: 800; font-stretch: 118%; font-size: var(--step-5); line-height: 1; letter-spacing: -0.03em; }
-  .stats__label { font-size: var(--step--1); color: var(--muted); font-weight: 600; }
-
-  @media (min-width: 52rem) {
-    .hero { padding-block: var(--space-7) var(--space-6); }
-    .hero__row { grid-template-columns: 1fr minmax(18rem, 30rem); justify-content: space-between; }
-    .stats { grid-template-columns: repeat(4, 1fr); }
-    .stats__item + .stats__item { border-left: 1px solid var(--line); padding-left: var(--space-4); }
+  @media (max-width: 859px) {
+    .hero__text, .hero__collage { grid-column: 1 / -1; }
+    .hero__collage { padding-bottom: 0; }
+    .hero__collage li:nth-child(3n + 2) { transform: none; }
   }
 
-  .people-grid { grid-template-columns: repeat(auto-fill, minmax(min(100%, 13rem), 1fr)); }
-  @media (max-width: 30rem) { .people-grid { grid-template-columns: repeat(2, 1fr); gap: var(--space-4) var(--space-3); } }
+  .question { row-gap: 28px; }
+  .question__label { grid-column: 1 / -1; }
+  .question__title { grid-column: 1 / 10; font-size: clamp(44px, 7vw, 96px); }
+  .question__answer { grid-column: 1 / 9; font: italic 400 clamp(28px, 3.4vw, 44px)/1.25 var(--display); }
+  .question__body { grid-column: 6 / 12; display: grid; gap: 12px; }
+  @media (max-width: 859px) { .question > * { grid-column: 1 / -1 !important; } }
 
-  .method-band { margin-top: var(--space-5); }
-  .method-band__list { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-5); grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr)); }
-  .method-band__n { display: block; color: var(--night-accent); font-weight: 700; margin-bottom: var(--space-2); }
-  .method-band__list h3 { font-size: var(--step-2); }
+  .inverted h2 { margin-top: 10px; }
+  .method-link { margin-top: 40px; }
 </style>

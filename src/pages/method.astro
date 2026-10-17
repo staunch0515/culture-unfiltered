@@ -1,6 +1,5 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import SectionHead from '@/components/SectionHead.astro';
 import { principles } from '@/lib/method';
 import { href } from '@/lib/url';
 
@@ -15,41 +14,36 @@ const steps = [
 <BaseLayout title="Our Method" searchType="Page" description="How we make Culture, Unfiltered: five principles for telling personal stories.">
   <div class="wrap">
     <header class="page-head">
-      <p class="eyebrow">How we work</p>
+      <p class="label">How we work</p>
       <h1>Our Method</h1>
-      <p class="lede">Culture, Unfiltered works like a small anthropology project. We observe everyday life, ask good questions, and listen more than we explain.</p>
+      <p class="intro">Culture, Unfiltered works like a small anthropology project. We observe everyday life, ask good questions, and <span class="mark">listen more than we explain</span>.</p>
     </header>
 
-    <section class="section" aria-labelledby="principles-heading">
-      <SectionHead index={1} id="principles-heading" title="Five principles" />
-      <ol class="principles reveal-stagger">
-        {principles.map((p, i) => (
+    <section class="text-section" aria-labelledby="principles-heading">
+      <h2 id="principles-heading">Five principles</h2>
+      <ul class="principles reveal-stagger">
+        {principles.map((p) => (
           <li class="reveal">
-            <span class="principles__n" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
-            <h3>{p.title}</h3>
+            <h3 class="accent-bar">{p.title}</h3>
             <p>{p.text}</p>
           </li>
         ))}
-      </ol>
+      </ul>
     </section>
 
-    <section class="section" aria-labelledby="process-heading">
-      <SectionHead index={2} id="process-heading" title="How a story gets made" />
-      <ol class="steps">
-        {steps.map((step) => <li class="reveal">{step}</li>)}
-      </ol>
-      <p><a class="button" href={href('/resources/')}>Use our method in class <span class="arrow" aria-hidden="true">→</span></a></p>
+    <section class="text-section prose" aria-labelledby="process-heading">
+      <h2 id="process-heading">How a story gets made</h2>
+      <ol>{steps.map((step) => <li>{step}</li>)}</ol>
+      <p><a class="btn btn-primary" href={href('/resources/')}>Use our method in class <span class="arrow" aria-hidden="true">→</span></a></p>
     </section>
   </div>
 </BaseLayout>
 
 <style>
-  .principles { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-5) var(--space-4); grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); }
-  .principles li { border-top: 2px solid var(--ink); padding-top: var(--space-3); }
-  .principles__n { display: block; font-family: var(--font-display); font-weight: 800; font-stretch: 118%; font-size: var(--step-5); line-height: 1; color: var(--accent); margin-bottom: var(--space-3); }
-  .principles h3 { font-size: var(--step-2); }
-  .principles p { font-family: var(--font-serif); font-size: var(--step-1); color: var(--ink-soft); margin: 0; }
-  .steps { counter-reset: step; list-style: none; padding: 0; margin: 0 0 var(--space-5); max-width: 48rem; }
-  .steps li { counter-increment: step; display: grid; grid-template-columns: 3rem 1fr; gap: var(--space-3); padding: var(--space-4) 0; border-top: 1px solid var(--line); font-family: var(--font-serif); font-size: var(--step-1); }
-  .steps li::before { content: counter(step); font-family: var(--font-display); font-weight: 800; font-size: var(--step-2); color: var(--accent); line-height: 1.1; }
+  .text-section { padding-top: clamp(40px, 6vw, 72px); }
+  .text-section > h2 { font-size: clamp(34px, 5vw, 56px); margin-bottom: 32px; }
+  .prose.text-section > h2 { margin-bottom: 0; }
+  .principles { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr)); gap: 32px 24px; }
+  .principles h3 { font-size: 28px; margin-bottom: 10px; }
+  .principles p { color: var(--muted); font-size: 17px; }
 </style>

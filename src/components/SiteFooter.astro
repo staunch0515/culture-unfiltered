@@ -1,37 +1,30 @@
 ---
+import Wordmark from './Wordmark.astro';
 import { site } from '@/lib/site';
 import { href } from '@/lib/url';
-const year = new Date().getUTCFullYear();
+const links = [...site.nav.filter((n) => n.path !== '/'), { label: 'Map', path: '/map/' }, { label: 'Search', path: '/search/' }];
 ---
-<footer class="site-footer on-night">
-  <div class="wrap">
-    <p class="site-footer__mark">Culture,<br /><span>Unfiltered.</span></p>
-    <div class="site-footer__grid">
-      <p class="site-footer__tagline">{site.tagline}</p>
-      <nav aria-label="Footer">
-        <ul>
-          {site.nav.filter((n) => n.path !== '/').map((n) => <li><a href={href(n.path)}>{n.label}</a></li>)}
-          <li><a href={href('/map/')}>Map</a></li>
-        </ul>
-      </nav>
-      <p class="muted small">Made by young people. Participants are shown by first name only, and we never publish schools or addresses.</p>
+<footer class="site-footer">
+  <div class="wrap site-footer__inner">
+    <div class="site-footer__about">
+      <a class="site-footer__brand" href={href('/')}><Wordmark /></a>
+      <p>{site.tagline}</p>
+      <p class="site-footer__privacy">Made by young people. Participants appear by first name only; we never publish schools or addresses. No tracking, no third-party fonts.</p>
     </div>
-    <p class="muted small site-footer__legal">© {year} {site.name}</p>
+    <nav aria-label="Footer">
+      <ul class="site-footer__links">
+        {links.map((n) => <li><a href={href(n.path)}>{n.label}</a></li>)}
+      </ul>
+    </nav>
   </div>
 </footer>
 
 <style>
-  .site-footer { margin-top: var(--space-8); padding-block: var(--space-7) var(--space-5); }
-  .site-footer__mark {
-    font-family: var(--font-display); font-weight: 800; font-stretch: 125%; letter-spacing: -0.03em;
-    font-size: var(--step-6); line-height: 0.9; margin-bottom: var(--space-6);
-  }
-  .site-footer__mark span { color: var(--night-accent); }
-  .site-footer__grid { display: grid; gap: var(--space-5); border-top: 1px solid #3a3a3a; padding-top: var(--space-5); }
-  @media (min-width: 48rem) { .site-footer__grid { grid-template-columns: 1.2fr 1fr 1fr; } }
-  .site-footer__tagline { font-family: var(--font-serif); font-size: var(--step-2); line-height: 1.3; margin: 0; }
-  ul { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-1); }
-  ul a { display: inline-block; padding-block: 0.3rem; color: var(--night-text); text-decoration: none; font-weight: 600; }
-  ul a:hover { color: var(--night-accent); text-decoration: underline; }
-  .site-footer__legal { margin: var(--space-6) 0 0; }
+  .site-footer { border-top: 1.5px solid var(--ink); padding-block: 40px 56px; margin-top: clamp(48px, 8vw, 104px); }
+  .site-footer__inner { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 24px 48px; }
+  .site-footer__about { display: grid; gap: 10px; align-content: start; }
+  .site-footer__brand { text-decoration: none; color: var(--ink); display: inline-flex; min-height: var(--tap); align-items: center; }
+  .site-footer__privacy { color: var(--muted); font-size: 16px; max-width: 44ch; }
+  .site-footer__links { list-style: none; padding: 0; margin: 0; display: grid; }
+  .site-footer__links a { display: inline-flex; align-items: center; min-height: var(--tap); min-width: var(--tap); }
 </style>

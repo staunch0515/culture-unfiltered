@@ -8,9 +8,9 @@ const themeData = s.themes.map((theme) => ({ theme, count: s.storiesAbout(theme.
 <BaseLayout title="Themes" description="The everyday themes we explore: one question, many answers.">
   <div class="wrap">
     <header class="page-head">
-      <p class="eyebrow">{s.themes.length} shared questions</p>
+      <p class="label">{s.themes.length} shared questions</p>
       <h1>Themes</h1>
-      <p class="lede">One question per theme, answered by people in different places and placed side by side.</p>
+      <p class="intro">One question per theme, answered by people in different places and placed side by side.</p>
     </header>
     <ThemeList themes={themeData} headingLevel="h2" />
   </div>

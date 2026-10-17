@@ -28,14 +28,11 @@ const providerName = provider === 'youtube' ? 'YouTube' : 'Vimeo';
   <div class="video__frame" data-video-src={src} data-video-title={title}>
     <button type="button" class="video__play">
       {poster && <Image src={poster} alt="" width={1600} class="video__poster" loading={eager ? 'eager' : 'lazy'} fetchpriority={eager ? 'high' : undefined} />}
-      <span class="video__icon" aria-hidden="true">▶</span>
-      <span class="video__label">Play video<span class="visually-hidden">: {title}</span></span>
+      <span class="video__disc" aria-hidden="true"><svg viewBox="0 0 24 24" width="30" height="30"><path d="M8 5.5v13l11-6.5z" fill="currentColor" /></svg></span>
+      <span class="visually-hidden">Play video: {title}</span>
+      <span class="video__notice">The {providerName} player loads only when you press play{captions ? ' · Captions available' : ''}</span>
     </button>
   </div>
-  <figcaption class="video__note">
-    Plays from {providerName}. Nothing loads from {providerName} until you press play.
-    {captions && <span> Captions available.</span>}
-  </figcaption>
 </figure>
 
 <script>
@@ -56,30 +53,34 @@ const providerName = provider === 'youtube' ? 'YouTube' : 'Vimeo';
 
 <style>
   .video { margin: 0; }
-  .video__frame { position: relative; aspect-ratio: 16 / 9; background: var(--night); border-radius: var(--radius-lg); overflow: hidden; }
-  .video--compact .video__frame { border-radius: var(--radius); }
+  .video__frame { position: relative; aspect-ratio: 16 / 9; background: var(--poster); overflow: hidden; }
   .video__frame :global(iframe) { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
-  .video__play { all: unset; position: absolute; inset: 0; cursor: pointer; display: grid; place-items: center; color: var(--paper); }
-  .video__play:focus-visible { outline: 3px solid var(--focus); outline-offset: -6px; border-radius: var(--radius-lg); }
-  .video__poster { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform var(--dur-3) var(--ease-out), filter var(--dur-2); filter: brightness(0.82); }
-  .video__play:hover .video__poster { transform: scale(1.03); filter: brightness(0.7); }
-  .video__icon {
-    position: relative; display: grid; place-items: center; width: clamp(4rem, 3rem + 4vw, 6.5rem); aspect-ratio: 1;
-    border-radius: 50%; background: var(--accent); color: var(--accent-contrast);
-    font-size: clamp(1.3rem, 1rem + 1vw, 2rem); padding-left: 0.3rem;
-    box-shadow: 0 0 0 0 rgb(184 54 15 / 0.45);
-    transition: transform var(--dur-2) var(--ease-out);
+  .video__play { all: unset; position: absolute; inset: 0; cursor: pointer; display: grid; place-items: center; color: var(--on-poster); }
+  .video__play:focus-visible { outline: 3px solid var(--focus); outline-offset: -6px; }
+  .video__poster { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 600ms ease-out; }
+  .video__play:hover .video__poster { transform: scale(1.03); }
+  .video__disc {
+    position: relative; display: grid; place-items: center; width: 88px; height: 88px; border-radius: 50%;
+    background: var(--mark); color: var(--on-mark); padding-left: 4px;
+    box-shadow: 0 0 0 6px rgb(23 24 26 / 0.35);
   }
-  .video__play:hover .video__icon { transform: scale(1.08); }
+  .video__notice {
+    position: absolute; left: 0; right: 0; bottom: 0; padding: 8px 12px;
+    background: rgb(0 0 0 / 0.72); color: var(--on-poster);
+    font: 500 12px/1.4 var(--mono); letter-spacing: 0.06em; text-transform: uppercase;
+  }
+  .video--compact .video__disc { width: 64px; height: 64px; }
+  .video--compact .video__disc svg { width: 22px; height: 22px; }
+  @media (max-width: 519px) {
+    .video__disc { width: 64px; height: 64px; }
+    .video__disc svg { width: 22px; height: 22px; }
+  }
   @media (prefers-reduced-motion: no-preference) {
-    .video__icon { animation: pulse 2.4s var(--ease-out) 3; }
+    .video__disc { transition: transform var(--motion) ease-out; animation: disc-pulse 2.4s ease-out 3; }
+    .video__play:hover .video__disc { transform: scale(1.06); }
   }
-  @keyframes pulse { 70% { box-shadow: 0 0 0 1.2rem rgb(184 54 15 / 0); } 100% { box-shadow: 0 0 0 0 rgb(184 54 15 / 0); } }
-  .video__label {
-    position: absolute; top: var(--space-3); left: var(--space-3);
-    background: var(--night); color: var(--night-text); padding: 0.35rem 0.85rem; border-radius: var(--radius-pill);
-    font-size: var(--step--2); font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+  @keyframes disc-pulse {
+    0% { box-shadow: 0 0 0 6px rgb(23 24 26 / 0.35), 0 0 0 6px rgb(217 242 74 / 0.5); }
+    100% { box-shadow: 0 0 0 6px rgb(23 24 26 / 0.35), 0 0 0 26px rgb(217 242 74 / 0); }
   }
-  .video__note { font-size: var(--step--1); color: var(--muted); margin-top: var(--space-2); }
-  .video--compact .video__icon { width: 3.25rem; font-size: 1.1rem; }
 </style>

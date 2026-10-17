@@ -1,6 +1,5 @@
 ---
-import { Image } from 'astro:assets';
-import MediaIcon from './MediaIcon.astro';
+import Frame from './Frame.astro';
 import type { Story } from '@/lib/content';
 import { mediaLabels } from '@/lib/constants';
 import { href, formatDate, listJoin } from '@/lib/url';
@@ -8,54 +7,15 @@ import { href, formatDate, listJoin } from '@/lib/url';
 interface Props {
   story: Story;
   headingLevel?: 'h2' | 'h3';
-  variant?: 'default' | 'feature';
   eager?: boolean;
 }
-const { story, headingLevel: H = 'h3', variant = 'default', eager = false } = Astro.props;
+const { story, headingLevel: H = 'h3', eager = false } = Astro.props;
 const d = story.data;
 ---
-<article class:list={['card', 'story-card', `story-card--${variant}`]}>
-  <div class="card__media story-card__media">
-    <Image
-      src={d.thumbnail}
-      alt={d.thumbnailAlt}
-      width={variant === 'feature' ? 1200 : 720}
-      loading={eager ? 'eager' : 'lazy'}
-      fetchpriority={eager ? 'high' : undefined}
-    />
-    <span class="media-pill"><MediaIcon type={d.mediaType} size={14} />{mediaLabels[d.mediaType]}</span>
-  </div>
-  <div class="story-card__body">
-    <p class="eyebrow story-card__date"><time datetime={d.date.toISOString()}>{formatDate(d.date)}</time></p>
-    <H class="card__title story-card__title"><a class="card__link" href={href(`/stories/${story.id}/`)}>{d.title}</a></H>
-    <p class="story-card__desc">{d.description}</p>
-    <p class="story-card__by">
-      <span>By {listJoin(story.contributors.map((p) => p.data.name))}</span>
-      <span class="story-card__from">{story.countries.map((c) => c.data.name).join(' · ')}</span>
-    </p>
-  </div>
+<article class="card story-card">
+  <Frame src={d.thumbnail} alt={d.thumbnailAlt} width={480} sizes="(max-width: 859px) 100vw, 400px" eager={eager} />
+  <p class="label">{mediaLabels[d.mediaType]} · <time datetime={d.date.toISOString()}>{formatDate(d.date)}</time></p>
+  <H class="card__title"><a href={href(`/stories/${story.id}/`)}>{d.title}</a></H>
+  <p class="card__summary">{d.description}</p>
+  <p class="label">By {listJoin(story.contributors.map((p) => p.data.name))}</p>
 </article>
-
-<style>
-  .story-card__media { position: relative; aspect-ratio: 16 / 10; }
-  .story-card__media img { height: 100%; object-fit: cover; }
-  .media-pill {
-    position: absolute; left: var(--space-3); top: var(--space-3);
-    display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.3rem 0.7rem;
-    background: var(--ink); color: var(--paper); border-radius: var(--radius-pill);
-    font-size: var(--step--2); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
-  }
-  .story-card__body { display: flex; flex-direction: column; flex: 1; padding-top: var(--space-3); }
-  .story-card__date { margin-bottom: var(--space-2); }
-  .story-card__title { font-size: var(--step-2); margin-bottom: var(--space-2); }
-  .story-card__desc { font-family: var(--font-serif); color: var(--ink-soft); margin-bottom: var(--space-3); }
-  .story-card__by { margin: auto 0 0; display: flex; flex-wrap: wrap; gap: 0.25rem var(--space-3); font-size: var(--step--1); font-weight: 600; }
-  .story-card__from { color: var(--muted); font-weight: 500; }
-
-  @media (min-width: 52rem) {
-    .story-card--feature { display: grid; grid-template-columns: 1.45fr 1fr; gap: var(--space-5); align-items: center; }
-    .story-card--feature .story-card__media { aspect-ratio: 16 / 10; }
-    .story-card--feature .story-card__title { font-size: var(--step-4); line-height: 0.98; }
-    .story-card--feature .story-card__desc { font-size: var(--step-1); }
-  }
-</style>

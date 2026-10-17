@@ -1,8 +1,9 @@
 ---
-import { Image } from 'astro:assets';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import StoryCard from '@/components/StoryCard.astro';
 import SectionHead from '@/components/SectionHead.astro';
+import Frame from '@/components/Frame.astro';
+import Crumbs from '@/components/Crumbs.astro';
 import { loadSite, type Theme } from '@/lib/content';
 import { href } from '@/lib/url';
 
@@ -18,69 +19,59 @@ const stories = s.storiesAbout(theme.id);
 ---
 <BaseLayout title={theme.data.title} description={theme.data.question} searchType="Theme">
   <div class="wrap">
-    <header class="theme-head">
-      <p class="eyebrow"><span class="theme-head__emoji" aria-hidden="true">{theme.data.emoji}</span> Theme</p>
+    <header class="page-head theme-head">
+      <Crumbs trail={[{ label: 'Themes', path: '/themes/' }]} />
+      <p class="label"><span aria-hidden="true">{theme.data.emoji}</span> Theme</p>
       <h1>{theme.data.title}</h1>
       <p class="theme-head__question">{theme.data.question}</p>
-      <p class="theme-head__desc">{theme.data.description}</p>
+      <p class="intro">{theme.data.description}</p>
     </header>
-
-    <section class="section" aria-labelledby="compare-heading">
-      <SectionHead index={1} id="compare-heading" title="Side by side" />
-      {groups.length === 0 ? (
-        <p class="muted">No stories on this theme yet.</p>
-      ) : (
-        <ul class="compare reveal-stagger">
-          {groups.map(({ country, items }) => (
-            <li class="compare__col reveal">
-              <h3 class="compare__country">{country.data.name}</h3>
-              <ul class="compare__items">
-                {items.map(({ person, story, perspective }) => (
-                  <li class="compare__item">
-                    {perspective?.text && <blockquote><p>{perspective.text}</p></blockquote>}
-                    <div class="compare__who">
-                      <Image src={person.data.photo} alt="" width={96} height={96} class="compare__avatar" />
-                      <div>
-                        <a class="compare__name" href={href(`/people/${person.id}/`)}>{person.data.name}</a>
-                        <p class="compare__from">From <a href={href(`/stories/${story.id}/`)}>{story.data.title}</a></p>
-                      </div>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </li>
-          ))}
-        </ul>
-      )}
-    </section>
-
-    {stories.length > 0 && (
-      <section class="section" aria-labelledby="stories-heading" data-pagefind-ignore>
-        <SectionHead index={2} id="stories-heading" title={`Stories about ${theme.data.title.toLowerCase()}`} />
-        <ul class="grid reveal-stagger">{stories.map((story) => <li class="reveal"><StoryCard story={story} /></li>)}</ul>
-      </section>
-    )}
-
-    <p><a class="text-link" href={href('/themes/')}><span aria-hidden="true">←</span> All themes</a></p>
   </div>
+
+  <section class="section wrap" aria-labelledby="compare-heading">
+    <SectionHead id="compare-heading" title="Side by side" eyebrow={`${groups.length} ${groups.length === 1 ? 'country' : 'countries'}`} />
+    {groups.length === 0 ? (
+      <p class="intro">No stories on this theme yet.</p>
+    ) : (
+      <div class="compare reveal-stagger">
+        {groups.map(({ country, items }) => (
+          <section class="compare__group reveal" aria-labelledby={`c-${country.id}`}>
+            <h3 id={`c-${country.id}`} class="compare__country"><span aria-hidden="true">{country.data.flag} </span>{country.data.name}</h3>
+            <ul class="compare__quotes">
+              {items.map(({ person, story, perspective }) => (
+                <li class="quote-card">
+                  <div class="quote-card__who">
+                    <Frame src={person.data.photo} alt="" ratio="avatar" width={52} fallbackName={person.data.name} />
+                    <div>
+                      <p class="quote-card__name"><a href={href(`/people/${person.id}/`)}>{person.data.name}</a></p>
+                      <p class="label">{person.data.location}</p>
+                    </div>
+                  </div>
+                  {perspective?.text && <p class="quote-card__text quote-card__text--quote">“{perspective.text}”</p>}
+                  <a class="more-link" href={href(`/stories/${story.id}/`)}>From “{story.data.title}” <span class="arrow" aria-hidden="true">→</span></a>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))}
+      </div>
+    )}
+  </section>
+
+  {stories.length > 0 && (
+    <section class="section wrap" aria-labelledby="stories-heading" data-pagefind-ignore>
+      <SectionHead id="stories-heading" title={`Stories about ${theme.data.title.toLowerCase()}`} />
+      <ul class="grid-3 reveal-stagger">{stories.map((story) => <li class="reveal"><StoryCard story={story} /></li>)}</ul>
+    </section>
+  )}
 </BaseLayout>
 
 <style>
-  .theme-head { padding-block: var(--space-7) var(--space-3); }
-  .theme-head__emoji { font-size: 1.4em; vertical-align: -0.15em; margin-right: 0.2em; }
-  .theme-head h1 { font-size: var(--step-6); line-height: 0.9; }
-  .theme-head__question { font-family: var(--font-serif); font-size: var(--step-4); line-height: 1.12; max-width: 22ch; margin-bottom: var(--space-4); }
-  .theme-head__desc { font-size: var(--step-1); color: var(--ink-soft); max-width: 50ch; }
-
-  .compare { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-5) var(--space-4); grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr)); }
-  .compare__col { border-top: 2px solid var(--ink); padding-top: var(--space-3); }
-  .compare__country { font-size: var(--step-2); margin-bottom: var(--space-4); }
-  .compare__items { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-5); }
-  .compare__item blockquote { margin: 0 0 var(--space-3); font-family: var(--font-serif); font-size: var(--step-1); line-height: 1.45; }
-  .compare__item blockquote p { margin: 0; }
-  .compare__item blockquote::before { content: '“'; display: block; font-family: var(--font-display); font-weight: 800; font-size: 2.6rem; line-height: 0.6; color: var(--accent); margin-bottom: var(--space-1); }
-  .compare__who { display: flex; gap: var(--space-3); align-items: center; }
-  .compare__avatar { width: 2.75rem; height: 2.75rem; border-radius: 50%; background: var(--paper-2); }
-  .compare__name { font-weight: 700; color: var(--ink); }
-  .compare__from { margin: 0; font-size: var(--step--1); color: var(--muted); }
+  .theme-head__question { font: italic 400 clamp(26px, 3vw, 38px)/1.3 var(--display); max-width: 30ch; }
+  /* Countries side by side; each column stacks that country's voices. */
+  .compare { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); gap: 48px 28px; align-items: start; }
+  .compare__group { display: grid; gap: 16px; align-content: start; }
+  .compare__country { font-size: clamp(30px, 3.4vw, 40px); }
+  .compare__quotes { list-style: none; padding: 0; margin: 0; display: grid; gap: 32px; }
+  .quote-card__text--quote { font: italic 400 22px/1.35 var(--display); -webkit-line-clamp: 8; }
 </style>

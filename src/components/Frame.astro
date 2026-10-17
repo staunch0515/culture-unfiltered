@@ -1,0 +1,38 @@
+---
+/**
+ * Fixed-ratio image frame: reserves its space before the image loads (no layout shift).
+ * Without an image it shows the initial of `fallbackName`.
+ */
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+interface Props {
+  src?: ImageMetadata | undefined;
+  alt?: string;
+  ratio?: 'portrait' | 'thumb' | 'square' | 'avatar';
+  width: number;
+  sizes?: string;
+  eager?: boolean;
+  fallbackName?: string;
+  class?: string;
+}
+const { src, alt = '', ratio = 'thumb', width, sizes, eager = false, fallbackName = '', class: cls } = Astro.props;
+const heightFor = { portrait: 1.25, thumb: 9 / 16, square: 1, avatar: 1 }[ratio];
+const widths = [width, Math.round(width * 1.5), width * 2].filter((w, i, a) => a.indexOf(w) === i);
+---
+<span class:list={['frame', ratio !== 'thumb' && `frame--${ratio}`, cls]}>
+  {src ? (
+    <Image
+      src={src}
+      alt={alt}
+      width={width}
+      height={Math.round(width * heightFor)}
+      widths={src.format === 'svg' || !sizes ? undefined : widths}
+      sizes={src.format === 'svg' ? undefined : sizes}
+      loading={eager ? 'eager' : 'lazy'}
+      fetchpriority={eager ? 'high' : undefined}
+    />
+  ) : (
+    <span class="frame__initial" aria-hidden="true">{fallbackName.trim().charAt(0).toUpperCase()}</span>
+  )}
+</span>

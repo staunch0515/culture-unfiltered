@@ -1,9 +1,9 @@
 ---
 /**
  * Lightweight SVG map: a static base map (/world-map.svg, built from Natural
- * Earth data at build time) plus inline markers. No tiles, no third-party
- * requests. Every marker comes from country data, so a new country file adds
- * a new marker and highlights its outline.
+ * Earth data at build time, with its own light/dark colours) plus inline
+ * markers. No tiles, no third-party requests. Every marker comes from country
+ * data, so a new country file adds a marker and highlights its outline.
  */
 import type { Country } from '@/lib/content';
 import { project, MAP_W as W, MAP_H as H } from '@/lib/geo';
@@ -18,55 +18,47 @@ const markers = countries.map(({ country, count }) => ({ country, count, ...proj
 ---
 <figure class="world-map">
   <svg viewBox={`0 0 ${W} ${H}`} role="group" aria-labelledby={headingId}>
-    <rect width={W} height={H} rx="24" class="world-map__sea" />
+    <rect width={W} height={H} class="world-map__sea" />
     <image href={href('/world-map.svg')} width={W} height={H} aria-hidden="true" />
     {markers.map(({ country, count, x, y }) => (
       <a href={href(`/people/?country=${country.id}`)} class="world-map__marker" data-country={country.id}>
         <title>{`${country.data.name}: ${count} ${count === 1 ? 'participant' : 'participants'}`}</title>
         <circle cx={x} cy={y} r="34" class="world-map__hit" />
-        <circle cx={x} cy={y} r="18" class="world-map__pulse" />
-        <circle cx={x} cy={y} r="9" class="world-map__dot" />
-        <text x={x} y={y - 20} text-anchor="middle" aria-hidden="true">{country.data.name}</text>
+        <circle cx={x} cy={y} r="16" class="world-map__pulse" />
+        <circle cx={x} cy={y} r="8" class="world-map__dot" />
+        <text x={x + 14} y={y + 5} aria-hidden="true">{country.data.name}</text>
       </a>
     ))}
   </svg>
   <figcaption class="visually-hidden">Map of participant countries. Each marker links to the people from that country.</figcaption>
 </figure>
-<ul class="world-map__list">
+<ul class="tags world-map__list">
   {countries.map(({ country, count }) => (
-    <li><a href={href(`/people/?country=${country.id}`)}><span aria-hidden="true">{country.data.flag}</span> {country.data.name} <span class="world-map__count">{count}<span class="visually-hidden"> {count === 1 ? 'participant' : 'participants'}</span></span></a></li>
+    <li><a class="tag" href={href(`/people/?country=${country.id}`)}><span aria-hidden="true">{country.data.flag}</span> {country.data.name} <span class="label">{count}<span class="visually-hidden"> {count === 1 ? 'participant' : 'participants'}</span></span></a></li>
   ))}
 </ul>
 
 <style>
   .world-map { margin: 0; container-type: inline-size; }
-  .world-map svg { width: 100%; height: auto; overflow: visible; }
+  .world-map svg { width: 100%; height: auto; display: block; overflow: visible; }
   .world-map__sea { fill: var(--paper-2); }
   .world-map__hit { fill: transparent; }
-  .world-map__dot { fill: var(--accent); stroke: var(--paper); stroke-width: 3; transition: r var(--dur-2) var(--ease-out), fill var(--dur-1); }
-  .world-map__pulse { fill: var(--accent); opacity: 0.18; transform-box: fill-box; transform-origin: center; }
-  .world-map__marker text { font: 700 18px var(--font-ui); fill: var(--ink); paint-order: stroke; stroke: var(--paper-2); stroke-width: 6px; stroke-linejoin: round; pointer-events: none; }
-  .world-map__marker:hover .world-map__dot, .world-map__marker:focus-visible .world-map__dot { fill: var(--ink); r: 12; }
+  .world-map__dot { fill: var(--ink); stroke: var(--paper); stroke-width: 3; transition: r var(--motion) ease-out; }
+  .world-map__pulse { fill: var(--mark); opacity: 0.55; transform-box: fill-box; transform-origin: center; }
+  .world-map__marker text { font: 500 15px var(--mono); letter-spacing: 0.06em; text-transform: uppercase; fill: var(--ink); paint-order: stroke; stroke: var(--paper-2); stroke-width: 5px; stroke-linejoin: round; pointer-events: none; }
+  .world-map__marker:hover .world-map__dot, .world-map__marker:focus-visible .world-map__dot { r: 11; }
   .world-map__marker:focus-visible { outline: none; }
-  .world-map__marker:focus-visible .world-map__hit { stroke: var(--focus); stroke-width: 5; }
+  .world-map__marker:focus-visible .world-map__hit { stroke: var(--focus); stroke-width: 4; }
   @media (prefers-reduced-motion: no-preference) {
-    .world-map__pulse { animation: map-pulse 2.8s var(--ease-out) infinite; }
+    .world-map__pulse { animation: map-pulse 2.8s ease-out infinite; }
   }
-  @keyframes map-pulse { 0% { transform: scale(0.6); opacity: 0.35; } 100% { transform: scale(1.8); opacity: 0; } }
+  @keyframes map-pulse { 0% { transform: scale(0.6); opacity: 0.7; } 100% { transform: scale(1.9); opacity: 0; } }
   /* Small maps: labels would collide, so the list below carries the names. */
   @container (max-width: 40rem) {
     .world-map__marker text { display: none; }
     .world-map__dot { r: 13; }
+    .world-map__hit { r: 66; } /* about 44px on a phone-sized map */
   }
-
-  .world-map__list { display: flex; flex-wrap: wrap; gap: var(--space-2); list-style: none; padding: 0; margin: var(--space-4) 0 0; }
-  .world-map__list a {
-    display: inline-flex; align-items: center; gap: 0.4em; min-height: 44px; padding: 0.4rem 0.9rem;
-    border: 1px solid var(--line-strong); border-radius: var(--radius-pill); background: var(--surface);
-    color: var(--ink); text-decoration: none; font-weight: 600;
-    transition: background-color var(--dur-1), color var(--dur-1);
-  }
-  .world-map__list a:hover { background: var(--ink); color: var(--paper); }
-  .world-map__count { color: var(--muted); font-weight: 500; }
-  .world-map__list a:hover .world-map__count { color: inherit; }
+  .world-map__list { margin-top: 20px; }
+  .world-map__list .label { margin-left: 2px; }
 </style>

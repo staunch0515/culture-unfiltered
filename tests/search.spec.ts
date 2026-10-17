@@ -44,7 +44,7 @@ test.describe('site search (Pagefind)', () => {
 
   test('the header search link is reachable on every width', async ({ page }) => {
     await page.goto('/');
-    await page.getByRole('link', { name: 'Search' }).click();
+    await page.locator('.site-header').getByRole('link', { name: 'Search' }).click();
     await expect(page).toHaveURL(/\/search\/$/);
   });
 });
@@ -57,7 +57,7 @@ test.describe('story filters with search', () => {
     await page.fill('#story-q', 'fixture');
     await expect(page).toHaveURL(/q=fixture/);
     await expect(visible).toHaveCount(2);
-    await page.selectOption('select[name="media"]', 'video');
+    await page.locator('input[name="media"][value="video"]').check({ force: true });
     await expect(visible).toHaveCount(1);
     await expect(page.getByRole('status')).toHaveText('Showing 1 story matching “fixture”');
 
@@ -65,9 +65,23 @@ test.describe('story filters with search', () => {
     await expect(page.locator('#story-q')).toHaveValue('fixture');
     await expect(visible).toHaveCount(1);
 
-    await page.getByRole('button', { name: 'Clear filters' }).click();
+    await page.getByRole('button', { name: 'Clear all filters' }).click();
     await expect(visible).toHaveCount(all);
     await expect(page).not.toHaveURL(/[?&](q|media)=/);
+  });
+
+  test('chips in one group combine with OR, across groups with AND', async ({ page }) => {
+    await page.goto(`${F}/stories/`);
+    const visible = page.locator('[data-filter-item="stories"]:visible');
+    const countOf = async (sel: string) => page.locator(`[data-filter-item="stories"]${sel}`).count();
+    await page.locator('input[name="media"][value="video"]').check({ force: true });
+    const videos = await countOf('[data-media="video"]');
+    await expect(visible).toHaveCount(videos);
+    await page.locator('input[name="media"][value="audio"]').check({ force: true });
+    await expect(visible).toHaveCount(videos + (await countOf('[data-media="audio"]')));
+    await expect(page).toHaveURL(/media=video%2Caudio|media=video,audio/);
+    await page.locator('input[name="country"][value="portugal"]').check({ force: true });
+    await expect(visible).toHaveCount(2); // the two Portugal fixture stories: one video, one audio
   });
 
   test('a search with no matches shows the empty message', async ({ page }) => {

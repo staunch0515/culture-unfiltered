@@ -1,10 +1,12 @@
 /**
  * Generic client-side filtering, no backend.
- * <form data-filter="x"> holds controls (select or radio) whose `name` is the URL
- * parameter and whose `data-key` is the item attribute to match (space-separated list).
+ * <form data-filter="x"> holds groups of checkboxes. Each checkbox's `name` is the URL
+ * parameter and its `data-key` the item attribute to match (a space-separated list).
+ * Within a group, any checked value matches; across groups, all groups must match.
  * An optional <input type="search" data-search="Story"> narrows items with Pagefind
  * (restricted to that result type); without an index it falls back to a text match.
  * Items carry `data-filter-item="x"` and `data-url`. `[data-filter-status="x"]` gets the count.
+ * State lives in the URL: ?country=kenya,sweden&media=video&q=food
  */
 import { searchSite, normalisePath } from './pagefind';
 
@@ -14,8 +16,8 @@ export function initFilters(): void {
     const items = [...document.querySelectorAll<HTMLElement>(`[data-filter-item="${group}"]`)];
     const status = document.querySelector<HTMLElement>(`[data-filter-status="${group}"]`);
     const empty = document.querySelector<HTMLElement>(`[data-filter-empty="${group}"]`);
-    const controls = [...form.querySelectorAll<HTMLInputElement | HTMLSelectElement>('[name][data-key]')];
-    const names = [...new Set(controls.map((c) => c.name))];
+    const boxes = [...form.querySelectorAll<HTMLInputElement>('input[type="checkbox"][name][data-key]')];
+    const names = [...new Set(boxes.map((b) => b.name))];
     const searchInput = form.querySelector<HTMLInputElement>('input[data-search]');
     const noun = form.dataset.noun ?? 'item';
     const nouns = form.dataset.nouns ?? `${noun}s`;
@@ -23,34 +25,30 @@ export function initFilters(): void {
     let matches: Set<HTMLElement> | null = null; // null = no search query
     let token = 0;
 
-    const valueOf = (name: string) => {
-      const els = controls.filter((c) => c.name === name);
-      const radio = els.find((c) => c instanceof HTMLInputElement && c.type === 'radio' && c.checked);
-      return (radio ?? els.find((c) => c instanceof HTMLSelectElement))?.value ?? '';
-    };
-    const keyOf = (name: string) => controls.find((c) => c.name === name)!.dataset.key!;
+    const checked = (name: string) => boxes.filter((b) => b.name === name && b.checked).map((b) => b.value);
+    const keyOf = (name: string) => boxes.find((b) => b.name === name)!.dataset.key!;
     const query = () => searchInput?.value.trim() ?? '';
 
     const apply = (updateUrl: boolean) => {
-      const active = names.map((n) => ({ name: n, key: keyOf(n), value: valueOf(n) })).filter((f) => f.value);
+      const active = names.map((n) => ({ name: n, key: keyOf(n), values: checked(n) })).filter((f) => f.values.length);
       let shown = 0;
       for (const item of items) {
         const ok =
-          active.every((f) => (item.dataset[f.key] ?? '').split(' ').includes(f.value)) &&
-          (matches === null || matches.has(item));
+          active.every((f) => {
+            const have = (item.dataset[f.key] ?? '').split(' ');
+            return f.values.some((v) => have.includes(v));
+          }) && (matches === null || matches.has(item));
         item.hidden = !ok;
         if (ok) shown++;
       }
       const q = query();
-      if (status) {
-        status.textContent = `Showing ${shown} ${shown === 1 ? noun : nouns}${q ? ` matching “${q}”` : ''}`;
-      }
+      if (status) status.textContent = `Showing ${shown} ${shown === 1 ? noun : nouns}${q ? ` matching “${q}”` : ''}`;
       if (empty) empty.hidden = shown !== 0;
       if (updateUrl) {
         const url = new URL(location.href);
         for (const n of names) url.searchParams.delete(n);
         url.searchParams.delete('q');
-        for (const f of active) url.searchParams.set(f.name, f.value);
+        for (const f of active) url.searchParams.set(f.name, f.values.join(','));
         if (q) url.searchParams.set('q', q);
         history.replaceState(null, '', url);
       }
@@ -77,15 +75,11 @@ export function initFilters(): void {
       apply(updateUrl);
     };
 
-    // Restore state from the URL (?country=kenya&q=food etc.).
+    // Restore state from the URL.
     const params = new URLSearchParams(location.search);
     for (const name of names) {
-      const v = params.get(name);
-      if (!v) continue;
-      for (const c of controls.filter((c) => c.name === name)) {
-        if (c instanceof HTMLSelectElement && [...c.options].some((o) => o.value === v)) c.value = v;
-        if (c instanceof HTMLInputElement && c.value === v) c.checked = true;
-      }
+      const wanted = new Set((params.get(name) ?? '').split(',').filter(Boolean));
+      for (const b of boxes.filter((x) => x.name === name)) b.checked = wanted.has(b.value);
     }
     if (searchInput) searchInput.value = params.get('q') ?? '';
 

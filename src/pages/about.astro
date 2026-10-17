@@ -8,24 +8,29 @@ const s = await loadSite();
 <BaseLayout title="About" searchType="Page" description="About Culture, Unfiltered: who we are and why we made it.">
   <div class="wrap">
     <header class="page-head">
-      <p class="eyebrow">About the project</p>
+      <p class="label">About the project</p>
       <h1>About</h1>
-      <p class="lede">{site.name} is a digital anthropology exhibition made by teenagers in {listJoin(s.activeCountries.map((c) => c.data.name))}.</p>
+      <p class="intro">{site.name} is a digital anthropology exhibition made by teenagers in {listJoin(s.activeCountries.map((c) => c.data.name))}.</p>
     </header>
-    <div class="editorial">
-      <h2>Why we made it</h2>
-      <p>Most of what we learn about other countries comes from news, films and stereotypes. We wanted to hear from people our own age, about ordinary days, in their own words.</p>
-      <h2>Who we are</h2>
+    <section class="text-section prose" aria-labelledby="why-heading">
+      <h2 id="why-heading">Why we made it</h2>
+      <p>Most of what we learn about other countries comes from news, films and stereotypes. <span class="mark">We wanted to hear from people our own age</span>, about ordinary days, in their own words.</p>
+    </section>
+    <section class="text-section prose" aria-labelledby="who-heading">
+      <h2 id="who-heading">Who we are</h2>
       <p>We are {s.people.length} young people who met online. We share first names only, and we never publish schools, addresses or anything that could locate us.</p>
-      <h2>Safety and privacy</h2>
+    </section>
+    <section class="text-section prose" aria-labelledby="safety-heading">
+      <h2 id="safety-heading">Safety and privacy</h2>
       <p>Every participant and their guardian agreed to what is published here. Anyone can ask for their story to be changed or removed at any time.</p>
-    </div>
-    <p class="actions">
-      <a class="button" href={href('/people/')}>Meet the people <span class="arrow" aria-hidden="true">→</span></a>
-      <a class="button button--ghost" href={href('/method/')}>Read our method</a>
-    </p>
+      <p class="actions">
+        <a class="btn btn-primary" href={href('/people/')}>Meet the people <span class="arrow" aria-hidden="true">→</span></a>
+        <a class="btn" href={href('/method/')}>Read our method</a>
+      </p>
+    </section>
   </div>
 </BaseLayout>
 <style>
-  .actions { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-top: var(--space-5); }
+  .text-section { padding-top: clamp(40px, 6vw, 72px); }
+  .actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 12px; }
 </style>

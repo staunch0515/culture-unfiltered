@@ -1,5 +1,5 @@
 ---
-import { Image } from 'astro:assets';
+import Frame from './Frame.astro';
 import CountryLabel from './CountryLabel.astro';
 import type { Person } from '@/lib/content';
 import { href } from '@/lib/url';
@@ -7,17 +7,13 @@ interface Props { person: Person; headingLevel?: 'h2' | 'h3'; showBio?: boolean 
 const { person, headingLevel: H = 'h3', showBio = true } = Astro.props;
 ---
 <article class="card person-card" data-country={person.country.id}>
-  <div class="card__media person-card__media">
-    <Image src={person.data.photo} alt={person.data.photoAlt} width={480} height={480} />
-  </div>
-  <p class="eyebrow person-card__place"><CountryLabel country={person.country} /></p>
-  <H class="card__title person-card__name"><a class="card__link" href={href(`/people/${person.id}/`)}>{person.data.name}</a></H>
-  {showBio && <p class="person-card__bio">{person.data.bio}</p>}
+  <Frame src={person.data.photo} alt={person.data.photoAlt} ratio="portrait" width={320} sizes="(max-width: 639px) 50vw, 300px" fallbackName={person.data.name} />
+  <p class="label"><CountryLabel country={person.country} flag /></p>
+  <H class="card__title"><a href={href(`/people/${person.id}/`)}>{person.data.name}</a></H>
+  {showBio && <p class="card__summary person-card__bio">{person.data.bio}</p>}
+  <p class="more-link" aria-hidden="true">View profile <span class="arrow">→</span></p>
 </article>
 <style>
-  .person-card__media { aspect-ratio: 4 / 5; margin-bottom: var(--space-3); border-radius: var(--radius-lg); }
-  .person-card__media img { height: 100%; object-fit: cover; }
-  .person-card__place { margin-bottom: var(--space-1); }
-  .person-card__name { font-size: var(--step-3); margin-bottom: var(--space-2); }
-  .person-card__bio { font-family: var(--font-serif); color: var(--ink-soft); margin: 0; }
+  .person-card__bio { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .person-card .more-link { min-height: auto; }
 </style>

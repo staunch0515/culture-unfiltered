@@ -1,89 +1,49 @@
 /*
- * Design tokens: Culture, Unfiltered.
- * Paper and ink, one vermilion accent, strong wide display type, generous space.
- * Contrast (WCAG 2.2 AA): ink 16.9:1, muted 6.5:1, accent text 5.3:1 on paper.
+ * Every text/background pair used on the site has contrast >= 4.5:1 (large text and the focus ring >= 3:1).
+ * The highlighter (--mark) only ever sits behind ink text (--on-mark); it is never a text colour.
  */
 :root {
-  /* Colour */
-  --paper: #f6f3ec;
-  --paper-2: #ece6da;
-  --surface: #fffdf8;
-  --ink: #121212;
-  --ink-soft: #3b3833;
-  --muted: #5c574f;
-  --line: #d8d1c3;
-  --line-strong: #8a8377; /* non-text UI only (3.4:1) */
-  --accent: #b8360f;
-  --accent-contrast: #ffffff;
-  --accent-tint: #f3dcd0;
-  --night: #141414;
-  --night-text: #f6f3ec;
-  --night-muted: #a9a398;
-  --night-accent: #ff8657;
-  --focus: #1d4ed8;
-  --notice-bg: #121212;
-  --notice-text: #f6f3ec;
+  --paper: #f2f1ec;      /* page background */
+  --paper-2: #e8e7e0;    /* image placeholders, map background */
+  --ink: #17181a;        /* text, rules that matter, primary buttons */
+  --muted: #53554e;      /* secondary text, labels */
+  --rule: #d5d4cb;       /* hairlines, quiet borders */
+  --mark: #d9f24a;       /* the highlighter: behind ink text, short bars, selected chips */
+  --on-mark: #17181a;    /* text on the highlighter, in both schemes */
+  --focus: #1b4dd8;      /* focus ring */
+  --inv-bg: #17181a;     /* the inverted block */
+  --inv-ink: #f2f1ec;
+  --inv-muted: #b9bab2;
+  --poster: #17181a;     /* behind a video before it plays */
+  --on-poster: #f2f1ec;
 
-  /* Type families */
-  --font-display: 'Archivo Variable', 'Archivo', 'Helvetica Neue', Arial, sans-serif;
-  --font-ui: 'Archivo Variable', 'Archivo', 'Helvetica Neue', Arial, sans-serif;
-  --font-serif: 'Source Serif 4 Variable', 'Source Serif 4', Georgia, 'Times New Roman', serif;
+  --display: 'Instrument Serif', 'Iowan Old Style', Georgia, serif;
+  --body: 'Atkinson Hyperlegible', 'Segoe UI', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  --body-zh: 'PingFang SC', 'Hiragino Sans GB', 'Noto Sans CJK SC', 'Microsoft YaHei', system-ui, sans-serif;
+  --body-ja: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Noto Sans CJK JP', 'Yu Gothic', Meiryo, system-ui, sans-serif;
 
-  /* Fluid type scale (375px → 1440px) */
-  --step--2: 0.75rem;
-  --step--1: 0.875rem;
-  --step-0: clamp(1rem, 0.96rem + 0.19vw, 1.125rem);
-  --step-1: clamp(1.15rem, 1.07rem + 0.38vw, 1.4rem);
-  --step-2: clamp(1.35rem, 1.2rem + 0.7vw, 1.85rem);
-  --step-3: clamp(1.65rem, 1.35rem + 1.3vw, 2.6rem);
-  --step-4: clamp(2.1rem, 1.6rem + 2.3vw, 3.75rem);
-  --step-5: clamp(2.5rem, 1.75rem + 3.6vw, 5.25rem);
-  --step-6: clamp(3rem, 1.6rem + 6.3vw, 7.75rem);
+  --gutter: clamp(16px, 4vw, 48px);  /* side padding */
+  --max: 1240px;                      /* content width */
+  --measure: 66ch;                    /* line length of running text */
+  --tap: 44px;                        /* minimum target size */
+  --motion: 200ms;                    /* longest animation */
 
-  /* Display type character */
-  --display-weight: 800;
-  --display-stretch: 118%;
-  --display-tracking: -0.025em;
-
-  /* Space */
-  --space-1: 0.25rem;
-  --space-2: 0.5rem;
-  --space-3: 1rem;
-  --space-4: 1.5rem;
-  --space-5: 2.5rem;
-  --space-6: 4rem;
-  --space-7: 6rem;
-  --space-8: clamp(4rem, 2.5rem + 6vw, 9rem);
-
-  /* Layout */
-  --page-max: 80rem;
-  --measure: 66ch;
-  --gutter: 1rem;
-  --header-h: 4rem;
-
-  /* Shape */
-  --radius-sm: 4px;
-  --radius: 8px;
-  --radius-lg: 16px;
-  --radius-pill: 999px;
-  --shadow-1: 0 1px 2px rgb(18 18 18 / 0.06), 0 2px 6px rgb(18 18 18 / 0.05);
-  --shadow-2: 0 10px 30px -10px rgb(18 18 18 / 0.25);
-
-  /* Motion */
-  --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
-  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
-  --dur-1: 150ms;
-  --dur-2: 280ms;
-  --dur-3: 600ms;
+  color-scheme: light;
 }
 
-@media (min-width: 48rem) {
-  :root { --gutter: 2rem; --header-h: 4.5rem; }
-}
-@media (min-width: 90rem) {
-  :root { --gutter: 3rem; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  :root { --dur-1: 0ms; --dur-2: 0ms; --dur-3: 0ms; }
+/* Dark scheme follows the system: paper and ink swap, the highlighter stays. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #131412;
+    --paper-2: #1d1e1b;
+    --ink: #ecece5;
+    --muted: #a9aaa2;
+    --rule: #34352f;
+    --focus: #8fb0ff;
+    --inv-bg: #ecece5;
+    --inv-ink: #131412;
+    --inv-muted: #4a4b45;
+    color-scheme: dark;
+  }
 }

@@ -1,0 +1,22 @@
+---
+/** Ruled list of resources (classroom activities, guides, prompts). */
+import type { Resource } from '@/lib/content';
+import { resourceKindLabels } from '@/lib/constants';
+import { href } from '@/lib/url';
+interface Props { resources: Resource[]; headingLevel?: 'h2' | 'h3'; filterGroup?: string }
+const { resources, headingLevel: H = 'h2', filterGroup } = Astro.props;
+---
+<ul class="ruled-list resource-list">
+  {resources.map((r) => (
+    <li class="card resource-row reveal" data-filter-item={filterGroup} data-kind={r.data.kind}>
+      <p class="label">{resourceKindLabels[r.data.kind]} · Ages {r.data.ageGroup} · {r.data.duration}{r.data.pdf && ' · PDF'}</p>
+      <H class="card__title resource-row__title"><a href={href(`/resources/${r.id}/`)}>{r.data.title}</a></H>
+      <p class="card__summary">{r.data.description}</p>
+    </li>
+  ))}
+</ul>
+<style>
+  .resource-row { gap: 8px; }
+  .resource-row__title { font-size: clamp(28px, 3.4vw, 40px); }
+  .resource-row.card:focus-within { outline-offset: 2px; }
+</style>

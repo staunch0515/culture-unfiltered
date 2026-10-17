@@ -14,6 +14,9 @@ export default defineConfig({
   projects: [
     { name: 'mobile', use: { viewport: { width: 375, height: 812 }, isMobile: true, hasTouch: true } },
     { name: 'desktop', use: { viewport: { width: 1440, height: 900 } } },
+    // Dark colour scheme: every page again, for layout and contrast.
+    { name: 'mobile-dark', testMatch: /smoke\.spec\.ts/, use: { viewport: { width: 375, height: 812 }, isMobile: true, hasTouch: true, colorScheme: 'dark' } },
+    { name: 'desktop-dark', testMatch: /smoke\.spec\.ts/, use: { viewport: { width: 1440, height: 900 }, colorScheme: 'dark' } },
   ],
   webServer: [
     { command: 'node scripts/serve.mjs dist 4421', url: SITE, reuseExistingServer: !process.env.CI },

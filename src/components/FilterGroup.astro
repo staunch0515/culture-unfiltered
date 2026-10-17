@@ -1,0 +1,26 @@
+---
+/** A fieldset of checkbox chips for the client-side filter (see src/scripts/filters.ts). */
+interface Props {
+  legend: string;
+  name: string;
+  dataKey: string;
+  options: { value: string; label: string; flag?: string; count?: number }[];
+}
+const { legend, name, dataKey, options } = Astro.props;
+---
+<fieldset class="filter-group">
+  <legend class="label">{legend}</legend>
+  {options.map((o) => (
+    <label class="chip">
+      <input type="checkbox" name={name} value={o.value} data-key={dataKey} />
+      <span>
+        {o.flag && <span aria-hidden="true">{o.flag}</span>}
+        {o.label}
+        {o.count !== undefined && <span class="label chip__count">{o.count}</span>}
+      </span>
+    </label>
+  ))}
+</fieldset>
+<style>
+  .chip__count { color: inherit; opacity: 0.85; }
+</style>

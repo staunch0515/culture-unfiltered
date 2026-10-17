@@ -1,0 +1,11 @@
+---
+import { href } from '@/lib/url';
+interface Props { trail: { label: string; path: string }[] }
+const { trail } = Astro.props;
+---
+<nav aria-label="Breadcrumb">
+  <ol class="crumbs">
+    <li><a href={href('/')}>Home</a></li>
+    {trail.map((t) => <li><a href={href(t.path)}>{t.label}</a></li>)}
+  </ol>
+</nav>
